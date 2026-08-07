@@ -21,7 +21,7 @@ from db_executor import MYSQL_CONFIG
 from run_experiment import print_summary
 
 
-INPUT_PATH = "qwen_results.csv"  # το αρχείο που κατέβασες από το Colab
+INPUT_PATH = "data/results/qwen_results_raw.csv"
 DB_CONFIG = MYSQL_CONFIG
 DB_LABEL = "mysql"
 LLM_LABEL = "qwen2.5-coder-7b"
