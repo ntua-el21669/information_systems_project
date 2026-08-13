@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="620" viewBox="0 0 1080 620" role="img" aria-labelledby="title desc">
+<title id="title">Execution accuracy by difficulty</title>
+<desc id="desc">Grouped bar chart of percentages by model and category.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<text x="90" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="700">Execution accuracy by difficulty</text>
+<text x="90" y="62" font-family="Arial, sans-serif" font-size="13" fill="#475569">Strict excludes trivial empty-result matches; whiskers are 95% Wilson confidence intervals.</text>
+<line x1="90" y1="505.0" x2="1050" y2="505.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="78" y="510.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12">0%</text>
+<line x1="90" y1="421.6" x2="1050" y2="421.6" stroke="#cbd5e1" stroke-width="1"/>
+<text x="78" y="426.6" text-anchor="end" font-family="Arial, sans-serif" font-size="12">20%</text>
+<line x1="90" y1="338.2" x2="1050" y2="338.2" stroke="#cbd5e1" stroke-width="1"/>
+<text x="78" y="343.2" text-anchor="end" font-family="Arial, sans-serif" font-size="12">40%</text>
+<line x1="90" y1="254.8" x2="1050" y2="254.8" stroke="#cbd5e1" stroke-width="1"/>
+<text x="78" y="259.8" text-anchor="end" font-family="Arial, sans-serif" font-size="12">60%</text>
+<line x1="90" y1="171.4" x2="1050" y2="171.4" stroke="#cbd5e1" stroke-width="1"/>
+<text x="78" y="176.4" text-anchor="end" font-family="Arial, sans-serif" font-size="12">80%</text>
+<line x1="90" y1="88.0" x2="1050" y2="88.0" stroke="#cbd5e1" stroke-width="1"/>
+<text x="78" y="93.0" text-anchor="end" font-family="Arial, sans-serif" font-size="12">100%</text>
+<line x1="90" y1="88" x2="90" y2="505" stroke="#334155"/>
+<line x1="90" y1="505" x2="1050" y2="505" stroke="#334155"/>
+<rect x="194.0" y="400.8" width="25.0" height="104.2" fill="#2563eb" opacity="1"/>
+<line x1="206.5" y1="441.5" x2="206.5" y2="345.7" stroke="#111827"/>
+<line x1="202.5" y1="441.5" x2="210.5" y2="441.5" stroke="#111827"/>
+<line x1="202.5" y1="345.7" x2="210.5" y2="345.7" stroke="#111827"/>
+<text x="206.5" y="395.8" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">25%</text>
+<rect x="222.0" y="264.4" width="25.0" height="240.6" fill="#2563eb" opacity="0.48"/>
+<text x="234.5" y="259.4" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">58%</text>
+<rect x="250.0" y="392.7" width="25.0" height="112.3" fill="#d97706" opacity="1"/>
+<line x1="262.5" y1="435.1" x2="262.5" y2="337.1" stroke="#111827"/>
+<line x1="258.5" y1="435.1" x2="266.5" y2="435.1" stroke="#111827"/>
+<line x1="258.5" y1="337.1" x2="266.5" y2="337.1" stroke="#111827"/>
+<text x="262.5" y="387.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">27%</text>
+<rect x="278.0" y="320.6" width="25.0" height="184.4" fill="#d97706" opacity="0.48"/>
+<text x="290.5" y="315.6" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">44%</text>
+<text x="250.0" y="529" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">easy</text>
+<rect x="514.0" y="470.8" width="25.0" height="34.2" fill="#2563eb" opacity="1"/>
+<line x1="526.5" y1="490.2" x2="526.5" y2="430.8" stroke="#111827"/>
+<line x1="522.5" y1="490.2" x2="530.5" y2="490.2" stroke="#111827"/>
+<line x1="522.5" y1="430.8" x2="530.5" y2="430.8" stroke="#111827"/>
+<text x="526.5" y="465.8" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">8%</text>
+<rect x="542.0" y="224.7" width="25.0" height="280.3" fill="#2563eb" opacity="0.48"/>
+<text x="554.5" y="219.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">67%</text>
+<rect x="570.0" y="464.0" width="25.0" height="41.0" fill="#d97706" opacity="1"/>
+<line x1="582.5" y1="485.9" x2="582.5" y2="422.2" stroke="#111827"/>
+<line x1="578.5" y1="485.9" x2="586.5" y2="485.9" stroke="#111827"/>
+<line x1="578.5" y1="422.2" x2="586.5" y2="422.2" stroke="#111827"/>
+<text x="582.5" y="459.0" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">10%</text>
+<rect x="598.0" y="265.7" width="25.0" height="239.3" fill="#d97706" opacity="0.48"/>
+<text x="610.5" y="260.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">57%</text>
+<text x="570.0" y="529" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">medium</text>
+<rect x="834.0" y="455.3" width="25.0" height="49.7" fill="#2563eb" opacity="1"/>
+<line x1="846.5" y1="471.3" x2="846.5" y2="433.1" stroke="#111827"/>
+<line x1="842.5" y1="471.3" x2="850.5" y2="471.3" stroke="#111827"/>
+<line x1="842.5" y1="433.1" x2="850.5" y2="433.1" stroke="#111827"/>
+<text x="846.5" y="450.3" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">12%</text>
+<rect x="862.0" y="392.6" width="25.0" height="112.4" fill="#2563eb" opacity="0.48"/>
+<text x="874.5" y="387.6" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">27%</text>
+<rect x="890.0" y="481.2" width="25.0" height="23.8" fill="#d97706" opacity="1"/>
+<line x1="902.5" y1="491.6" x2="902.5" y2="463.6" stroke="#111827"/>
+<line x1="898.5" y1="491.6" x2="906.5" y2="491.6" stroke="#111827"/>
+<line x1="898.5" y1="463.6" x2="906.5" y2="463.6" stroke="#111827"/>
+<text x="902.5" y="476.2" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">6%</text>
+<rect x="918.0" y="433.7" width="25.0" height="71.3" fill="#d97706" opacity="0.48"/>
+<text x="930.5" y="428.7" text-anchor="middle" font-family="Arial, sans-serif" font-size="10">17%</text>
+<text x="890.0" y="529" text-anchor="middle" font-family="Arial, sans-serif" font-size="12">hard</text>
+<rect x="90" y="566" width="14" height="14" fill="#2563eb" opacity="1"/>
+<text x="110" y="577" font-family="Arial, sans-serif" font-size="12">GPT-4o-mini — strict</text>
+<rect x="325" y="566" width="14" height="14" fill="#2563eb" opacity="0.48"/>
+<text x="345" y="577" font-family="Arial, sans-serif" font-size="12">GPT-4o-mini — lenient</text>
+<rect x="560" y="566" width="14" height="14" fill="#d97706" opacity="1"/>
+<text x="580" y="577" font-family="Arial, sans-serif" font-size="12">Qwen2.5-Coder-7B-Instruct — strict</text>
+<rect x="795" y="566" width="14" height="14" fill="#d97706" opacity="0.48"/>
+<text x="815" y="577" font-family="Arial, sans-serif" font-size="12">Qwen2.5-Coder-7B-Instruct — lenient</text>
+</svg>

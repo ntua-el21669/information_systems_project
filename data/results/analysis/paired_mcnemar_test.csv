@@ -1,0 +1,3 @@
+test,metric,n_pairs,gpt_only_correct,qwen_only_correct,discordant_pairs,p_value
+Exact paired McNemar test (two-sided),Strict execution accuracy excluding trivial empty matches,306,18,8,26,0.07551869750022888
+Exact paired McNemar test (two-sided),Lenient execution accuracy,306,43,11,54,1.4013057456185862e-05
