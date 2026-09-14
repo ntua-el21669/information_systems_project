@@ -6463,6 +6463,35 @@ Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
 Example:
 Question: which airports serve boston
 SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+atis,hard,i need information on flights from WASHINGTON to BOSTON that leave on a SATURDAY,"SELECT DISTINCT FLIGHTalias0.FLIGHT_ID FROM AIRPORT_SERVICE AS AIRPORT_SERVICEalias0 , AIRPORT_SERVICE AS AIRPORT_SERVICEalias1 , CITY AS CITYalias0 , CITY AS CITYalias1 , DAYS AS DAYSalias0 , FLIGHT AS FLIGHTalias0 WHERE ( CITYalias1.CITY_CODE = AIRPORT_SERVICEalias1.CITY_CODE AND CITYalias1.CITY_NAME = ""BOSTON"" AND DAYSalias0.DAY_NAME = ""SATURDAY"" AND FLIGHTalias0.FLIGHT_DAYS = DAYSalias0.DAYS_CODE AND FLIGHTalias0.TO_AIRPORT = AIRPORT_SERVICEalias1.AIRPORT_CODE ) AND CITYalias0.CITY_CODE = AIRPORT_SERVICEalias0.CITY_CODE AND CITYalias0.CITY_NAME = ""WASHINGTON"" AND FLIGHTalias0.FROM_AIRPORT = AIRPORT_SERVICEalias0.AIRPORT_CODE ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
 atis,medium,show me the flights into DAL,"SELECT DISTINCT FLIGHTalias0.FLIGHT_ID FROM AIRPORT AS AIRPORTalias0 , AIRPORT_SERVICE AS AIRPORT_SERVICEalias0 , CITY AS CITYalias0 , FLIGHT AS FLIGHTalias0 WHERE AIRPORTalias0.AIRPORT_CODE = ""DAL"" AND CITYalias0.CITY_CODE = AIRPORT_SERVICEalias0.CITY_CODE AND FLIGHTalias0.FROM_AIRPORT = AIRPORT_SERVICEalias0.AIRPORT_CODE AND FLIGHTalias0.TO_AIRPORT = AIRPORTalias0.AIRPORT_CODE ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
 Table: airline(airline_code, airline_name, note)
 Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
@@ -6695,135 +6724,6 @@ Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
 Example:
 Question: which airports serve boston
 SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
-custom_advising,hard,Which instructors have taught more course offerings than the average number of offerings per instructor?,"SELECT oi.INSTRUCTOR_ID, COUNT(*) AS offering_count FROM OFFERING_INSTRUCTOR oi GROUP BY oi.INSTRUCTOR_ID HAVING COUNT(*) > ( SELECT AVG(cnt) FROM ( SELECT COUNT(*) AS cnt FROM OFFERING_INSTRUCTOR GROUP BY INSTRUCTOR_ID ) AS counts ) ;","Table: AREA(course_id, area)
-Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
-Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
-Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
-Table: COURSE_PREREQUISITE(pre_course_id, course_id)
-Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
-Table: GSI(course_offering_id, student_id)
-Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
-Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
-Table: PROGRAM(program_id, name, college, introduction)
-Table: PROGRAM_COURSE(program_id, course_id, workload, category)
-Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
-Table: SEMESTER(semester_id, semester, year)
-Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
-Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
-
-Example:
-Question: what courses are related to artificial intelligence
-SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
-custom_advising,medium,Find students whose total GPA is higher than the average GPA of students in the same program.,"SELECT s.student_id, s.firstname, s.lastname, s.total_gpa FROM STUDENT s WHERE s.total_gpa > ( SELECT AVG(s2.total_gpa) FROM STUDENT s2 WHERE s2.program_id = s.program_id ) ;","Table: AREA(course_id, area)
-Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
-Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
-Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
-Table: COURSE_PREREQUISITE(pre_course_id, course_id)
-Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
-Table: GSI(course_offering_id, student_id)
-Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
-Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
-Table: PROGRAM(program_id, name, college, introduction)
-Table: PROGRAM_COURSE(program_id, course_id, workload, category)
-Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
-Table: SEMESTER(semester_id, semester, year)
-Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
-Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
-
-Example:
-Question: what courses are related to artificial intelligence
-SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
-custom_atis,hard,Which airlines operate more flights than the average number of flights per airline?,"SELECT airline_code, COUNT(*) AS flight_count FROM flight GROUP BY airline_code HAVING COUNT(*) > ( SELECT AVG(cnt) FROM ( SELECT COUNT(*) AS cnt FROM flight GROUP BY airline_code ) AS airline_counts ) ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
-Table: airline(airline_code, airline_name, note)
-Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
-Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
-Table: city(city_code, city_name, state_code, country_name, time_zone_code)
-Table: class_of_service(booking_class, rank, class_description)
-Table: code_description(code, description)
-Table: compartment_class(compartment, class_type)
-Table: date_day(month_number, day_number, year, day_name)
-Table: days(days_code, day_name)
-Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
-Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
-Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
-Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
-Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
-Table: flight_fare(flight_id, fare_id)
-Table: flight_leg(flight_id, leg_number, leg_flight)
-Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
-Table: food_service(meal_code, meal_number, compartment, meal_description)
-Table: ground_service(city_code, airport_code, transport_type, ground_fare)
-Table: month(month_number, month_name)
-Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
-Table: state(state_code, state_name, country_name)
-Table: time_interval(period, begin_time, end_time)
-Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
-
-Example:
-Question: which airports serve boston
-SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
-custom_atis,medium,"For each route (from airport to airport) that has more than one airline offering a fare, show the cheapest one-direction cost.","SELECT from_airport, to_airport, MIN(one_direction_cost) AS cheapest_fare FROM fare GROUP BY from_airport, to_airport HAVING COUNT(DISTINCT fare_airline) > 1 ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
-Table: airline(airline_code, airline_name, note)
-Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
-Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
-Table: city(city_code, city_name, state_code, country_name, time_zone_code)
-Table: class_of_service(booking_class, rank, class_description)
-Table: code_description(code, description)
-Table: compartment_class(compartment, class_type)
-Table: date_day(month_number, day_number, year, day_name)
-Table: days(days_code, day_name)
-Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
-Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
-Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
-Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
-Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
-Table: flight_fare(flight_id, fare_id)
-Table: flight_leg(flight_id, leg_number, leg_flight)
-Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
-Table: food_service(meal_code, meal_number, compartment, meal_description)
-Table: ground_service(city_code, airport_code, transport_type, ground_fare)
-Table: month(month_number, month_name)
-Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
-Table: state(state_code, state_name, country_name)
-Table: time_interval(period, begin_time, end_time)
-Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
-
-Example:
-Question: which airports serve boston
-SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
-custom_geography,easy,Which pairs of neighboring states both have a population density (population/area) above 100?,"SELECT b.STATE_NAME, b.BORDER FROM border_info b JOIN state s1 ON b.STATE_NAME = s1.STATE_NAME JOIN state s2 ON b.BORDER = s2.STATE_NAME WHERE (s1.POPULATION / s1.AREA) > 100 AND (s2.POPULATION / s2.AREA) > 100 ;","Table: border_info(state_name, border)
-Table: city(city_name, population, country_name, state_name)
-Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
-Table: lake(lake_name, area, country_name, state_name)
-Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
-Table: river(river_name, length, country_name, traverse)
-Table: state(state_name, population, area, country_name, capital, density)
-
-Example:
-Question: how big is texas
-SQL: SELECT area FROM state WHERE state_name = 'texas';"
-custom_geography,hard,"Which states have both a lake and a mountain, and border at least 3 other states?",SELECT DISTINCT s.STATE_NAME FROM state s WHERE s.STATE_NAME IN (SELECT STATE_NAME FROM lake) AND s.STATE_NAME IN (SELECT STATE_NAME FROM mountain) AND ( SELECT COUNT(*) FROM border_info b WHERE b.STATE_NAME = s.STATE_NAME ) >= 3 ;,"Table: border_info(state_name, border)
-Table: city(city_name, population, country_name, state_name)
-Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
-Table: lake(lake_name, area, country_name, state_name)
-Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
-Table: river(river_name, length, country_name, traverse)
-Table: state(state_name, population, area, country_name, capital, density)
-
-Example:
-Question: how big is texas
-SQL: SELECT area FROM state WHERE state_name = 'texas';"
-custom_geography,medium,List states where the capital is NOT the most populous city in that state.,SELECT s.STATE_NAME FROM state s WHERE s.CAPITAL != ( SELECT c.CITY_NAME FROM city c WHERE c.STATE_NAME = s.STATE_NAME ORDER BY c.POPULATION DESC LIMIT 1 ) ;,"Table: border_info(state_name, border)
-Table: city(city_name, population, country_name, state_name)
-Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
-Table: lake(lake_name, area, country_name, state_name)
-Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
-Table: river(river_name, length, country_name, traverse)
-Table: state(state_name, population, area, country_name, capital, density)
-
-Example:
-Question: how big is texas
-SQL: SELECT area FROM state WHERE state_name = 'texas';"
 geography,easy,what states does the colorado river run through,"SELECT RIVERalias0.TRAVERSE FROM RIVER AS RIVERalias0 WHERE RIVERalias0.RIVER_NAME = ""colorado"" ;","Table: border_info(state_name, border)
 Table: city(city_name, population, country_name, state_name)
 Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
@@ -7099,3 +6999,552 @@ Table: state(state_name, population, area, country_name, capital, density)
 Example:
 Question: how big is texas
 SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,Which states border a state whose capital population is above the average city population across all states?,SELECT DISTINCT b.STATE_NAME FROM border_info b JOIN state s ON b.BORDER = s.STATE_NAME JOIN city c ON c.CITY_NAME = s.CAPITAL AND c.STATE_NAME = s.STATE_NAME WHERE c.POPULATION > ( SELECT AVG(POPULATION) FROM city ) ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,"For each state, list the number of cities with population over 100000, but only show states with more than 2 such cities.","SELECT STATE_NAME, COUNT(*) AS big_city_count FROM city WHERE POPULATION > 100000 GROUP BY STATE_NAME HAVING COUNT(*) > 2 ;","Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,hard,"Which rivers flow through more states than the river with the most states, minus one?",SELECT RIVER_NAME FROM river GROUP BY RIVER_NAME HAVING COUNT(DISTINCT TRAVERSE) >= ( SELECT MAX(state_count) - 1 FROM ( SELECT COUNT(DISTINCT TRAVERSE) AS state_count FROM river GROUP BY RIVER_NAME ) AS counts ) ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,List states whose area is larger than the average area of states they border.,SELECT s.STATE_NAME FROM state s WHERE s.AREA > ( SELECT AVG(s2.AREA) FROM border_info b JOIN state s2 ON b.BORDER = s2.STATE_NAME WHERE b.STATE_NAME = s.STATE_NAME ) ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,Find the state with the highest ratio of population to area among states that have at least one mountain.,"SELECT s.STATE_NAME, (s.POPULATION / s.AREA) AS density FROM state s WHERE s.STATE_NAME IN ( SELECT DISTINCT STATE_NAME FROM mountain ) ORDER BY density DESC LIMIT 1 ;","Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,hard,"Which states have both a lake and a mountain, and border at least 3 other states?",SELECT DISTINCT s.STATE_NAME FROM state s WHERE s.STATE_NAME IN (SELECT STATE_NAME FROM lake) AND s.STATE_NAME IN (SELECT STATE_NAME FROM mountain) AND ( SELECT COUNT(*) FROM border_info b WHERE b.STATE_NAME = s.STATE_NAME ) >= 3 ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,easy,"For every state, compute the difference between its highest and lowest point elevation, and list the top 5 states with the largest difference.","SELECT STATE_NAME, (HIGHEST_ELEVATION - LOWEST_ELEVATION) AS elevation_range FROM highlow ORDER BY elevation_range DESC LIMIT 5 ;","Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,hard,"Which cities are the most populous city in their state, and also have a population greater than the state's capital?","SELECT c.CITY_NAME, c.STATE_NAME FROM city c WHERE c.POPULATION = ( SELECT MAX(c2.POPULATION) FROM city c2 WHERE c2.STATE_NAME = c.STATE_NAME ) AND c.POPULATION > ( SELECT cap.POPULATION FROM city cap JOIN state s ON cap.CITY_NAME = s.CAPITAL AND cap.STATE_NAME = s.STATE_NAME WHERE s.STATE_NAME = c.STATE_NAME ) ;","Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,hard,"List the top 3 states by number of rivers, along with the count, excluding states with zero rivers.","SELECT TRAVERSE AS STATE_NAME, COUNT(*) AS river_count FROM river GROUP BY TRAVERSE ORDER BY river_count DESC LIMIT 3 ;","Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,easy,Which pairs of neighboring states both have a population density (population/area) above 100?,"SELECT b.STATE_NAME, b.BORDER FROM border_info b JOIN state s1 ON b.STATE_NAME = s1.STATE_NAME JOIN state s2 ON b.BORDER = s2.STATE_NAME WHERE (s1.POPULATION / s1.AREA) > 100 AND (s2.POPULATION / s2.AREA) > 100 ;","Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,Find states where the tallest mountain is taller than the tallest mountain in every state they border.,SELECT DISTINCT m.STATE_NAME FROM mountain m WHERE m.MOUNTAIN_ALTITUDE > ALL ( SELECT m2.MOUNTAIN_ALTITUDE FROM border_info b JOIN mountain m2 ON b.BORDER = m2.STATE_NAME WHERE b.STATE_NAME = m.STATE_NAME ) ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,What is the average population of cities in states that do not have any lakes?,SELECT AVG(c.POPULATION) FROM city c WHERE c.STATE_NAME NOT IN ( SELECT DISTINCT STATE_NAME FROM lake ) ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,"Which state has the most cities with population under 50000, and how many such cities does it have?","SELECT STATE_NAME, COUNT(*) AS small_city_count FROM city WHERE POPULATION < 50000 GROUP BY STATE_NAME ORDER BY small_city_count DESC LIMIT 1 ;","Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,List states where the capital is NOT the most populous city in that state.,SELECT s.STATE_NAME FROM state s WHERE s.CAPITAL != ( SELECT c.CITY_NAME FROM city c WHERE c.STATE_NAME = s.STATE_NAME ORDER BY c.POPULATION DESC LIMIT 1 ) ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_geography,medium,Find rivers that traverse a state bordering the state with the largest area (among states that have land borders).,SELECT DISTINCT r.RIVER_NAME FROM river r WHERE r.TRAVERSE IN ( SELECT b.STATE_NAME FROM border_info b WHERE b.BORDER = ( SELECT STATE_NAME FROM state WHERE STATE_NAME IN (SELECT DISTINCT STATE_NAME FROM border_info) ORDER BY AREA DESC LIMIT 1 ) ) ;,"Table: border_info(state_name, border)
+Table: city(city_name, population, country_name, state_name)
+Table: highlow(state_name, highest_elevation, lowest_point, highest_point, lowest_elevation)
+Table: lake(lake_name, area, country_name, state_name)
+Table: mountain(mountain_name, mountain_altitude, country_name, state_name)
+Table: river(river_name, length, country_name, traverse)
+Table: state(state_name, population, area, country_name, capital, density)
+
+Example:
+Question: how big is texas
+SQL: SELECT area FROM state WHERE state_name = 'texas';"
+custom_atis,hard,Which airlines operate more flights than the average number of flights per airline?,"SELECT airline_code, COUNT(*) AS flight_count FROM flight GROUP BY airline_code HAVING COUNT(*) > ( SELECT AVG(cnt) FROM ( SELECT COUNT(*) AS cnt FROM flight GROUP BY airline_code ) AS airline_counts ) ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_atis,medium,Which cities are served by more than one airport?,"SELECT c.city_name, COUNT(DISTINCT s.airport_code) AS airport_count FROM city c JOIN airport_service s ON c.city_code = s.city_code GROUP BY c.city_name HAVING COUNT(DISTINCT s.airport_code) > 1 ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_atis,medium,"For each route (from airport to airport) that has more than one airline offering a fare, show the cheapest one-direction cost.","SELECT from_airport, to_airport, MIN(one_direction_cost) AS cheapest_fare FROM fare GROUP BY from_airport, to_airport HAVING COUNT(DISTINCT fare_airline) > 1 ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_atis,medium,Find flights that have more stops than the average number of stops among flights operated by the same airline.,"SELECT f.flight_id, f.airline_code, f.stops FROM flight f WHERE f.stops > ( SELECT AVG(f2.stops) FROM flight f2 WHERE f2.airline_code = f.airline_code ) ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_atis,hard,Which airlines have an average one-direction fare cost higher than the overall average across all airlines?,"SELECT fare_airline, AVG(one_direction_cost) AS avg_cost FROM fare GROUP BY fare_airline HAVING AVG(one_direction_cost) > ( SELECT AVG(one_direction_cost) FROM fare ) ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_atis,medium,Which states have airports served by flights from more than 3 different airlines?,"SELECT st.state_name, COUNT(DISTINCT fl.airline_code) AS airline_count FROM state st JOIN airport ap ON st.state_code = ap.state_code JOIN flight fl ON fl.from_airport = ap.airport_code GROUP BY st.state_name HAVING COUNT(DISTINCT fl.airline_code) > 3 ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_atis,medium,"Find the flight(s) with the maximum number of stops, along with the airline name operating them.","SELECT f.flight_id, al.airline_name, f.stops FROM flight f JOIN airline al ON f.airline_code = al.airline_code WHERE f.stops = ( SELECT MAX(stops) FROM flight ) ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_atis,hard,List fare basis codes whose average one-direction cost is above the overall average one-direction cost.,"SELECT fare_basis_code, AVG(one_direction_cost) AS avg_cost FROM fare GROUP BY fare_basis_code HAVING AVG(one_direction_cost) > ( SELECT AVG(one_direction_cost) FROM fare ) ;","Table: aircraft(aircraft_code, aircraft_description, manufacturer, basic_type, engines, propulsion, wide_body, wing_span, length, weight, capacity, pay_load, cruising_speed, range_miles, pressurized)
+Table: airline(airline_code, airline_name, note)
+Table: airport(airport_code, airport_name, airport_location, state_code, country_name, time_zone_code, minimum_connect_time)
+Table: airport_service(city_code, airport_code, miles_distant, direction, minutes_distant)
+Table: city(city_code, city_name, state_code, country_name, time_zone_code)
+Table: class_of_service(booking_class, rank, class_description)
+Table: code_description(code, description)
+Table: compartment_class(compartment, class_type)
+Table: date_day(month_number, day_number, year, day_name)
+Table: days(days_code, day_name)
+Table: dual_carrier(main_airline, low_flight_number, high_flight_number, dual_airline, service_name)
+Table: equipment_sequence(aircraft_code_sequence, aircraft_code)
+Table: fare(fare_id, from_airport, to_airport, fare_basis_code, fare_airline, restriction_code, one_direction_cost, round_trip_cost, round_trip_required)
+Table: fare_basis(fare_basis_code, booking_class, class_type, premium, economy, discounted, night, season, basis_days)
+Table: flight(flight_id, flight_days, from_airport, to_airport, departure_time, arrival_time, airline_flight, airline_code, flight_number, aircraft_code_sequence, meal_code, stops, connections, dual_carrier, time_elapsed)
+Table: flight_fare(flight_id, fare_id)
+Table: flight_leg(flight_id, leg_number, leg_flight)
+Table: flight_stop(flight_id, stop_number, stop_days, stop_airport, arrival_time, arrival_airline, arrival_flight_number, departure_time, departure_airline, departure_flight_number, stop_time)
+Table: food_service(meal_code, meal_number, compartment, meal_description)
+Table: ground_service(city_code, airport_code, transport_type, ground_fare)
+Table: month(month_number, month_name)
+Table: restriction(restriction_code, advance_purchase, stopovers, saturday_stay_required, minimum_stay, maximum_stay, application, no_discounts)
+Table: state(state_code, state_name, country_name)
+Table: time_interval(period, begin_time, end_time)
+Table: time_zone(time_zone_code, time_zone_name, hours_from_gmt)
+
+Example:
+Question: which airports serve boston
+SQL: SELECT DISTINCT airport_code FROM airport_service JOIN city ON airport_service.city_code = city.city_code WHERE city.city_name = 'BOSTON';"
+custom_advising,hard,Which instructors have taught more course offerings than the average number of offerings per instructor?,"SELECT oi.INSTRUCTOR_ID, COUNT(*) AS offering_count FROM OFFERING_INSTRUCTOR oi GROUP BY oi.INSTRUCTOR_ID HAVING COUNT(*) > ( SELECT AVG(cnt) FROM ( SELECT COUNT(*) AS cnt FROM OFFERING_INSTRUCTOR GROUP BY INSTRUCTOR_ID ) AS counts ) ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
+custom_advising,medium,List courses that have more than 2 prerequisite courses.,"SELECT c.COURSE_ID, c.NAME, COUNT(*) AS prereq_count FROM COURSE_PREREQUISITE cp JOIN COURSE c ON cp.course_id = c.COURSE_ID GROUP BY c.COURSE_ID, c.NAME HAVING COUNT(*) > 2 ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
+custom_advising,hard,Which programs have an average course workload higher than the overall average workload across all programs?,"SELECT program_id, AVG(workload) AS avg_workload FROM PROGRAM_COURSE GROUP BY program_id HAVING AVG(workload) > ( SELECT AVG(workload) FROM PROGRAM_COURSE ) ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
+custom_advising,medium,Find students whose total GPA is higher than the average GPA of students in the same program.,"SELECT s.student_id, s.firstname, s.lastname, s.total_gpa FROM STUDENT s WHERE s.total_gpa > ( SELECT AVG(s2.total_gpa) FROM STUDENT s2 WHERE s2.program_id = s.program_id ) ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
+custom_advising,medium,Which courses have a clarity score above the average clarity score for their department?,"SELECT c.COURSE_ID, c.NAME, c.DEPARTMENT, c.CLARITY_SCORE FROM COURSE c WHERE c.CLARITY_SCORE > ( SELECT AVG(c2.CLARITY_SCORE) FROM COURSE c2 WHERE c2.DEPARTMENT = c.DEPARTMENT ) ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
+custom_advising,medium,Find courses that are required as a prerequisite for more than 3 other courses.,"SELECT c.COURSE_ID, c.NAME, COUNT(*) AS required_for_count FROM COURSE_PREREQUISITE cp JOIN COURSE c ON cp.pre_course_id = c.COURSE_ID GROUP BY c.COURSE_ID, c.NAME HAVING COUNT(*) > 3 ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
+custom_advising,hard,Which semesters had more course offerings than the average number of offerings per semester?,"SELECT SEMESTER, COUNT(*) AS offering_count FROM COURSE_OFFERING GROUP BY SEMESTER HAVING COUNT(*) > ( SELECT AVG(cnt) FROM ( SELECT COUNT(*) AS cnt FROM COURSE_OFFERING GROUP BY SEMESTER ) AS counts ) ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"
+custom_advising,medium,Find courses with more enrolled students than the average enrollment across all courses in the same department.,"SELECT c.COURSE_ID, c.NAME, c.DEPARTMENT, c.NUM_ENROLLED FROM COURSE c WHERE c.NUM_ENROLLED > ( SELECT AVG(c2.NUM_ENROLLED) FROM COURSE c2 WHERE c2.DEPARTMENT = c.DEPARTMENT ) ;","Table: AREA(course_id, area)
+Table: COMMENT_INSTRUCTOR(instructor_id, student_id, score, comment_text)
+Table: COURSE(COURSE_ID, NAME, DEPARTMENT, NUMBER, CREDITS, ADVISORY_REQUIREMENT, ENFORCED_REQUIREMENT, DESCRIPTION, NUM_SEMESTERS, NUM_ENROLLED, HAS_DISCUSSION, HAS_LAB, HAS_PROJECTS, HAS_EXAMS, NUM_REVIEWS, CLARITY_SCORE, EASINESS_SCORE, HELPFULNESS_SCORE)
+Table: COURSE_OFFERING(OFFERING_ID, COURSE_ID, SEMESTER, SECTION_NUMBER, START_TIME, END_TIME, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY, HAS_FINAL_PROJECT, HAS_FINAL_EXAM, TEXTBOOK, CLASS_ADDRESS, ALLOW_AUDIT)
+Table: COURSE_PREREQUISITE(pre_course_id, course_id)
+Table: COURSE_TAGS_COUNT(COURSE_ID, CLEAR_GRADING, POP_QUIZ, GROUP_PROJECTS, INSPIRATIONAL, LONG_LECTURES, EXTRA_CREDIT, FEW_TESTS, GOOD_FEEDBACK, TOUGH_TESTS, HEAVY_PAPERS, CARES_FOR_STUDENTS, HEAVY_ASSIGNMENTS, RESPECTED, PARTICIPATION, HEAVY_READING, TOUGH_GRADER, HILARIOUS, WOULD_TAKE_AGAIN, GOOD_LECTURE, NO_SKIP)
+Table: GSI(course_offering_id, student_id)
+Table: INSTRUCTOR(INSTRUCTOR_ID, NAME, UNIQNAME)
+Table: OFFERING_INSTRUCTOR(OFFERING_INSTRUCTOR_ID, OFFERING_ID, INSTRUCTOR_ID)
+Table: PROGRAM(program_id, name, college, introduction)
+Table: PROGRAM_COURSE(program_id, course_id, workload, category)
+Table: PROGRAM_REQUIREMENT(program_id, category, min_credit, additional_req)
+Table: SEMESTER(semester_id, semester, year)
+Table: STUDENT(student_id, lastname, firstname, program_id, declare_major, total_credit, total_gpa, entered_as, admit_term, predicted_graduation_semester, degree, minor, internship)
+Table: STUDENT_RECORD(student_id, course_id, semester, grade, how, transfer_source, earn_credit, repeat_term, test_id, offering_id)
+
+Example:
+Question: what courses are related to artificial intelligence
+SQL: SELECT DISTINCT c.NAME FROM COURSE c JOIN AREA a ON c.COURSE_ID = a.COURSE_ID WHERE a.AREA LIKE '%artificial intelligence%';"

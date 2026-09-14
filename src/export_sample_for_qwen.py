@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from run_experiment import stratified_sample, SAMPLE_SIZE, RANDOM_SEED, INPUT_PATH
+from run_experiment import build_full_sample, SAMPLE_SIZE, RANDOM_SEED, INPUT_PATH
 from db_executor import connect, get_schema_description, MYSQL_CONFIG
 from evaluator import DATASET_TO_DATABASE, build_augmented_schema
 
@@ -25,9 +25,9 @@ if __name__ == "__main__":
     print(f"Loading {INPUT_PATH} ...")
     df = pd.read_csv(INPUT_PATH)
 
-    print(f"Selecting ΙΔΙΟ στρωματοποιημένο δείγμα με το GPT run "
-          f"(size~{SAMPLE_SIZE}, seed={RANDOM_SEED}) ...")
-    sample_df = stratified_sample(df, SAMPLE_SIZE, random_state=RANDOM_SEED)
+    print(f"Selecting ΙΔΙΟ δείγμα με το GPT run (public stratified size~{SAMPLE_SIZE} "
+          f"+ ΟΛΑ τα custom queries, seed={RANDOM_SEED}) ...")
+    sample_df = build_full_sample(df, SAMPLE_SIZE, RANDOM_SEED)
     print(f"Sample size: {len(sample_df)}")
 
     unique_databases = sorted(set(

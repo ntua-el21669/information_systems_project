@@ -28,6 +28,9 @@ DB_LABEL = "mysql"
 INPUT_PATH = "data/processed/all_datasets_combined.csv"
 OUTPUT_DIR = Path("data/results")
 
+# Τα 3 δημόσια datasets (σε αντίθεση με τα custom_* -- δικά μας queries)
+PUBLIC_DATASETS = {"geography", "atis", "advising"}
+
 
 def stratified_sample(df: pd.DataFrame, total_n: int, random_state: int = 42) -> pd.DataFrame:
     """Στρωματοποιημένο δείγμα διατηρώντας αναλογίες (dataset, difficulty)."""
@@ -42,17 +45,43 @@ def stratified_sample(df: pd.DataFrame, total_n: int, random_state: int = 42) ->
     return pd.concat(sampled_parts, ignore_index=True)
 
 
+def build_full_sample(df: pd.DataFrame, total_n: int = SAMPLE_SIZE,
+                       random_state: int = RANDOM_SEED) -> pd.DataFrame:
+    """
+    Στρωματοποιημένο δείγμα από τα 3 δημόσια datasets (~total_n ερωτήσεις,
+    διατηρώντας αναλογίες dataset x difficulty), ΣΥΝ ΟΛΑ τα custom_* queries
+    (31 συνολικά) -- ώστε τα custom queries (ρητή απαίτηση της εκφώνησης)
+    να μην "χάνονται" μέσα σε ένα τυχαίο δείγμα λόγω του πολύ μικρού τους
+    μεγέθους σε σχέση με τα δημόσια datasets.
+
+    ΣΗΜΑΝΤΙΚΟ: αυτή είναι η ΜΟΝΑΔΙΚΗ πηγή αλήθειας για το ποιες ερωτήσεις
+    μπαίνουν στο πείραμα -- τόσο το run_experiment.py (GPT) όσο και το
+    export_sample_for_qwen.py (Qwen) καλούν ΑΚΡΙΒΩΣ αυτή τη function, ώστε
+    τα δύο μοντέλα να αξιολογούνται πάντα πάνω στις ΙΔΙΕΣ ερωτήσεις --
+    προϋπόθεση για το paired McNemar test στο analyze_results.py (το οποίο
+    άλλωστε το επαληθεύει ρητά και σκάει με error αν δεν ταιριάζουν).
+    """
+    public_df = df[df["dataset"].isin(PUBLIC_DATASETS)]
+    custom_df = df[~df["dataset"].isin(PUBLIC_DATASETS)]
+
+    public_sample = stratified_sample(public_df, total_n, random_state=random_state)
+    return pd.concat([public_sample, custom_df], ignore_index=True)
+
+
 def print_summary(results_df: pd.DataFrame) -> None:
-    # Βαθμολογήσιμα (scoreable) items: το gold έτρεξε ΚΑΙ επέστρεψε γραμμές.
-    # Αν το gold επιστρέφει 0 γραμμές, κανένα μοντέλο δεν μπορεί να κριθεί
-    # σωστό ή λάθος απέναντί του -- τα βγάζουμε από τον παρονομαστή αντί να
-    # τα χρεώνουμε ως αποτυχίες του μοντέλου (βλ. analyze_results.drop_unscoreable).
-    if "gold_row_count" in results_df.columns:
-        scoreable = (results_df["gold_execution_error"].isna()
-                     & (results_df["gold_row_count"].fillna(0) > 0))
+    # Βαθμολογήσιμα (scoreable) items: το gold SQL έτρεξε χωρίς error.
+    # ΣΗΜΕΙΩΣΗ: ΔΕΝ αποκλείουμε πλέον queries όπου gold=0 γραμμές -- οι
+    # διορθωμένες compare_execution_results/_lenient() στο db_executor.py
+    # τις χειρίζονται ήδη σωστά (trivial_empty_match αν ΚΑΙ generated=0
+    # γραμμές, correct=False αν το generated επέστρεψε κάτι διαφορετικό).
+    # Ο μόνος πραγματικά "unscoreable" λόγος είναι το ίδιο το gold SQL να
+    # μην εκτελείται (gold_execution_error) -- τότε δεν έχουμε καν σημείο
+    # αναφοράς για σύγκριση.
+    if "gold_execution_error" in results_df.columns:
+        scoreable = results_df["gold_execution_error"].isna()
         n_dropped = int((~scoreable).sum())
         results_df = results_df[scoreable]
-        print(f"Unscoreable items dropped (gold fails or returns 0 rows): {n_dropped}")
+        print(f"Unscoreable items dropped (gold SQL execution error): {n_dropped}")
     total = len(results_df)
     n_correct_incl = results_df["correct"].sum()
     n_trivial = results_df["trivial_empty_match"].sum()
@@ -123,9 +152,9 @@ if __name__ == "__main__":
     df = pd.read_csv(INPUT_PATH)
     print(f"Total rows available: {len(df)}")
 
-    print(f"Selecting stratified sample of ~{SAMPLE_SIZE} rows "
-          f"(stratified by dataset x difficulty)...")
-    sample_df = stratified_sample(df, SAMPLE_SIZE, random_state=RANDOM_SEED)
+    print(f"Selecting stratified sample of ~{SAMPLE_SIZE} rows from public datasets, "
+          f"PLUS all custom_* queries...")
+    sample_df = build_full_sample(df, SAMPLE_SIZE, RANDOM_SEED)
     print(f"Actual sample size: {len(sample_df)}")
     print()
     print("Sample composition (rows per dataset):")
