@@ -18,8 +18,7 @@ from db_executor import MYSQL_CONFIG, MARIADB_CONFIG, check_connection
 from llm_client import generate_sql_gpt
 
 
-SAMPLE_SIZE = 300                      # ΚΛΕΙΔΩΜΕΝΟ -- ίδιο μέγεθος για ΟΛΑ τα 4 combos.
-                                        # Μην το αλλάξεις μετά το πρώτο πλήρες run.
+SAMPLE_SIZE = 300
 RANDOM_SEED = 42
 LLM_FUNCTION = generate_sql_gpt
 LLM_LABEL = "gpt-4o-mini"
@@ -44,6 +43,16 @@ def stratified_sample(df: pd.DataFrame, total_n: int, random_state: int = 42) ->
 
 
 def print_summary(results_df: pd.DataFrame) -> None:
+    # Βαθμολογήσιμα (scoreable) items: το gold έτρεξε ΚΑΙ επέστρεψε γραμμές.
+    # Αν το gold επιστρέφει 0 γραμμές, κανένα μοντέλο δεν μπορεί να κριθεί
+    # σωστό ή λάθος απέναντί του -- τα βγάζουμε από τον παρονομαστή αντί να
+    # τα χρεώνουμε ως αποτυχίες του μοντέλου (βλ. analyze_results.drop_unscoreable).
+    if "gold_row_count" in results_df.columns:
+        scoreable = (results_df["gold_execution_error"].isna()
+                     & (results_df["gold_row_count"].fillna(0) > 0))
+        n_dropped = int((~scoreable).sum())
+        results_df = results_df[scoreable]
+        print(f"Unscoreable items dropped (gold fails or returns 0 rows): {n_dropped}")
     total = len(results_df)
     n_correct_incl = results_df["correct"].sum()
     n_trivial = results_df["trivial_empty_match"].sum()
@@ -60,10 +69,14 @@ def print_summary(results_df: pd.DataFrame) -> None:
           f"{n_correct_excl}/{total} ({100 * n_correct_excl / total:.1f}%)")
     print(f"Trivial empty matches που αφαιρέθηκαν: {n_trivial}")
 
-    # Lenient accuracy: αν υπάρχει η στήλη (νέα runs μετά το few-shot/lenient fix)
+    # Lenient accuracy: αν υπάρχει η στήλη (νέα runs μετά το few-shot/lenient fix).
+    # ΧΩΡΙΣ trivial empty matches, ακριβώς όπως και το strict παραπάνω -- αλλιώς
+    # οι δύο μετρικές δεν είναι συγκρίσιμες μεταξύ τους.
     if "correct_lenient" in results_df.columns:
-        n_lenient = results_df["correct_lenient"].sum()
-        print(f"Accuracy (LENIENT -- ανεκτικό σε επιπλέον στήλες): "
+        n_lenient = (results_df["correct_lenient"]
+                     & ~results_df["trivial_empty_match"]).sum()
+        print(f"Accuracy (LENIENT -- ανεκτικό σε επιπλέον στήλες, "
+              f"ΧΩΡΙΣ trivial empty matches): "
               f"{n_lenient}/{total} ({100 * n_lenient / total:.1f}%)")
 
     print()
@@ -73,7 +86,7 @@ def print_summary(results_df: pd.DataFrame) -> None:
         correct_real = (group["correct"] & ~group["trivial_empty_match"]).sum()
         line = f"  {dataset_name:20s}: {correct_real}/{n} ({100 * correct_real / n:.1f}%)"
         if "correct_lenient" in results_df.columns:
-            lenient_n = group["correct_lenient"].sum()
+            lenient_n = (group["correct_lenient"] & ~group["trivial_empty_match"]).sum()
             line += f"   [lenient: {lenient_n}/{n} ({100 * lenient_n / n:.1f}%)]"
         print(line)
 
@@ -98,20 +111,12 @@ def print_summary(results_df: pd.DataFrame) -> None:
 
 
 if __name__ == "__main__":
-    # -----------------------------------------------------------------
-    # PRE-FLIGHT CHECK: επιβεβαίωσε ότι η βάση είναι προσβάσιμη ΠΡΙΝ
-    # ξεκινήσουμε εκατοντάδες (ενδεχομένως πληρωμένες) κλήσεις LLM.
-    # Αυτό αποτρέπει ακριβώς το πρόβλημα που είχαμε: 306 κλήσεις GPT
-    # "στο κενό" επειδή το MySQL container δεν έτρεχε.
-    # -----------------------------------------------------------------
-    print(f"Pre-flight check: επιβεβαίωση σύνδεσης στη βάση ({DB_LABEL})...")
+    print(f"επιβεβαίωση σύνδεσης στη βάση ({DB_LABEL})...")
     ok, error = check_connection(DB_CONFIG)
     if not ok:
-        print(f"[ΣΦΑΛΜΑ] Δεν μπορώ να συνδεθώ στη βάση: {error}")
         print("Έλεγξε ότι τα Docker containers τρέχουν: docker ps")
-        print("Αν όχι: docker start mysql-db mariadb-db")
         sys.exit(1)
-    print("Pre-flight check: OK, η βάση είναι προσβάσιμη.")
+    print("η βάση είναι προσβάσιμη.")
     print()
 
     print(f"Loading {INPUT_PATH} ...")

@@ -92,32 +92,38 @@ def score_generated_sql(dataset_label: str, gold_sql: str, generated_sql: str,
     result = {
         "execution_error": None,
         "gold_execution_error": None,
+        "gold_row_count": None,
         "execution_latency_seconds": None,
         "correct": False,
         "correct_lenient": False,
         "trivial_empty_match": False,
     }
 
-    # NaN-safe έλεγχος "δεν υπάρχει SQL" (το NaN είναι truthy στην Python)
-    if generated_sql is None or (isinstance(generated_sql, float) and pd.isna(generated_sql)) \
-            or (isinstance(generated_sql, str) and generated_sql.strip() == ""):
-        result["execution_error"] = "No SQL generated (LLM call failed)"
-        return result
-
     # Διόρθωση case στα table names (π.χ. "STATE" -> "state") ΠΡΙΝ την
     # εκτέλεση, ώστε το gold SQL (που κληρονομεί το case-convention του
     # πρωτότυπου .json dataset) να μπορεί πράγματι να εκτελεστεί στη δική
     # μας βάση -- βλ. σχόλιο στο normalize_table_case() για λεπτομέρειες.
     real_table_names = schema_cache.get_table_names(connection, database_name)
-    gold_sql = normalize_table_case(gold_sql, real_table_names)
-    generated_sql = normalize_table_case(generated_sql, real_table_names)
 
-    gold_exec = run_sql(connection, gold_sql)
+    # Το gold εκτελείται ΠΑΝΤΑ, και ΠΡΙΝ ελέγξουμε αν υπάρχει generated SQL.
+    # Το gold_row_count είναι ιδιότητα του ITEM, όχι του μοντέλου: ορίζει ποια
+    # items είναι βαθμολογήσιμα (ένα gold που επιστρέφει 0 γραμμές δεν μπορεί
+    # να ξεχωρίσει σωστό από λάθος μοντέλο). Αν το μετρούσαμε μόνο όταν
+    # υπάρχει generated SQL, ο παρονομαστής θα διέφερε ανά μοντέλο -- και δύο
+    # μοντέλα με διαφορετικό παρονομαστή δεν συγκρίνονται, ούτε στέκει το
+    # paired McNemar test, που απαιτεί ΤΑ ΙΔΙΑ items και στα δύο.
+    gold_exec = run_sql(connection, normalize_table_case(gold_sql, real_table_names))
     if gold_exec["error"] is not None:
         result["gold_execution_error"] = gold_exec["error"]
         return result
+    result["gold_row_count"] = len(gold_exec["rows"])
 
-    generated_exec = run_sql(connection, generated_sql)
+    # NaN-safe έλεγχος "δεν υπάρχει SQL" (το NaN είναι truthy στην Python)
+    if generated_sql is None or (isinstance(generated_sql, float) and pd.isna(generated_sql))             or (isinstance(generated_sql, str) and generated_sql.strip() == ""):
+        result["execution_error"] = "No SQL generated (LLM call failed)"
+        return result
+
+    generated_exec = run_sql(connection, normalize_table_case(generated_sql, real_table_names))
     result["execution_latency_seconds"] = generated_exec["latency_seconds"]
 
     if generated_exec["error"] is not None:
@@ -205,6 +211,7 @@ def evaluate_batch(df: pd.DataFrame, generate_sql_fn, db_config: dict,
                 "generation_error": f"Unexpected error: {e}",
                 "execution_error": None,
                 "gold_execution_error": None,
+                "gold_row_count": None,
                 "execution_latency_seconds": None,
                 "correct": False,
                 "correct_lenient": False,
@@ -265,6 +272,7 @@ def evaluate_batch_pregenerated(df: pd.DataFrame, db_config: dict,
                 "generation_error": f"Unexpected error during scoring: {e}",
                 "execution_error": None,
                 "gold_execution_error": None,
+                "gold_row_count": None,
                 "execution_latency_seconds": None,
                 "correct": False,
                 "correct_lenient": False,

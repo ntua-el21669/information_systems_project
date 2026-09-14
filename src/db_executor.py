@@ -184,6 +184,17 @@ def compare_execution_results_lenient(generated_rows, gold_rows) -> bool:
     gold_unique = {tuple(_normalize_value(v) for v in row) for row in gold_rows}
     gen_unique = {tuple(_normalize_value(v) for v in row) for row in generated_rows}
 
+    # ΚΕΝΟ GOLD: η συνθήκη "κάθε gold row περιέχεται σε κάποια generated row"
+    # ικανοποιείται ΚΕΝΟΛΟΓΙΚΑ όταν δεν υπάρχει καμία gold row -- ο βρόχος
+    # matching παρακάτω δεν εκτελείται ποτέ και γυρνάει True. Έτσι ΚΑΘΕ
+    # generated αποτέλεσμα μετριόταν σωστό όποτε το gold επέστρεφε 0 γραμμές,
+    # ακόμα και ένα άσχετο query με χιλιάδες γραμμές -- και το
+    # trivial_empty_match ΔΕΝ το έπιανε, γιατί απαιτεί να είναι κενά ΚΑΙ τα δύο.
+    # Με κενό gold συμφωνούμε μόνο αν είναι κενό και το generated: ακριβώς η
+    # περίπτωση που το trivial_empty_match εντοπίζει και εξαιρείται μετά.
+    if not gold_unique:
+        return not gen_unique
+
     gold_sets = [frozenset(row) for row in gold_unique]
     gen_sets = [frozenset(row) for row in gen_unique]
 

@@ -1,8 +1,9 @@
 """Create statistical summaries and charts from evaluation CSVs.
 
 The script uses the same metric used in the project:
-an exact execution match is correct only when it is not a
-trivial empty-result match.  GPT and Qwen are compared with an exact paired
+items whose gold query returns zero rows (or fails to execute) are
+UNSCOREABLE and are dropped from the sample entirely, rather than being
+counted as model failures.  GPT and Qwen are compared with an exact paired
 McNemar test because every model answered the same sampled questions.
 
 Usage:
@@ -59,7 +60,8 @@ def exact_mcnemar_p_value(b: int, c: int) -> float:
 
 def load_results() -> dict[str, pd.DataFrame]:
     data = {}
-    required = set(KEY_COLUMNS + ["correct", "correct_lenient", "trivial_empty_match", "execution_error"])
+    required = set(KEY_COLUMNS + ["correct", "correct_lenient", "trivial_empty_match",
+                                  "execution_error", "gold_execution_error", "gold_row_count"])
     for model, path in MODEL_FILES.items():
         if not path.exists():
             raise FileNotFoundError(f"Missing {model} results: {path}")
@@ -67,14 +69,38 @@ def load_results() -> dict[str, pd.DataFrame]:
         missing = required - set(df.columns)
         if missing:
             raise ValueError(f"{path} is missing columns: {sorted(missing)}")
-        # A trivial empty match must not contribute to the headline strict score.
-        df["strict_effective"] = df["correct"].fillna(False).astype(bool) & ~df[
-            "trivial_empty_match"
-        ].fillna(False).astype(bool)
-        df["lenient"] = df["correct_lenient"].fillna(False).astype(bool)
+        # An item is SCOREABLE only if its gold query ran and returned rows.
+        # If gold returns nothing, the comparison cannot tell a correct model
+        # from an incorrect one -- every answer "agrees" with an empty
+        # reference. This is a property of the ITEM (the gold SQL), not of the
+        # model, so it is identical across models and can be dropped without
+        # breaking the pairing the McNemar test depends on.
+        df["scoreable"] = (df["gold_execution_error"].isna()
+                           & (df["gold_row_count"].fillna(0) > 0))
+        # The trivial mask is kept as a defensive no-op: on the scoreable
+        # subset a both-empty match cannot occur, since gold returned rows.
+        trivial = df["trivial_empty_match"].fillna(False).astype(bool)
+        df["strict_effective"] = df["correct"].fillna(False).astype(bool) & ~trivial
+        df["lenient"] = df["correct_lenient"].fillna(False).astype(bool) & ~trivial
         df["execution_error_flag"] = df["execution_error"].notna()
         data[model] = df
     return data
+
+
+def drop_unscoreable(data: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame], int, int]:
+    """Drop items whose gold query returns nothing; verify the models agree on which."""
+    masks = {m: df["scoreable"].reset_index(drop=True) for m, df in data.items()}
+    reference_model, reference = next(iter(masks.items()))
+    for model, mask in masks.items():
+        if not mask.equals(reference):
+            raise ValueError(
+                f"Scoreable items differ between {reference_model} and {model} "
+                f"({int(reference.sum())} vs {int(mask.sum())}). Whether a gold query "
+                "returns rows must not depend on the model; re-score both files "
+                "against the same database before analysing."
+            )
+    kept = {m: df[df["scoreable"]].reset_index(drop=True) for m, df in data.items()}
+    return kept, len(reference), int(reference.sum())
 
 
 def metric_rows(data: dict[str, pd.DataFrame]) -> list[dict]:
@@ -122,8 +148,8 @@ def paired_tests(data: dict[str, pd.DataFrame]) -> list[dict]:
         raise ValueError("GPT and Qwen files do not contain the same questions.")
     tests = []
     for column, metric in [
-        ("strict_effective", "Strict execution accuracy excluding trivial empty matches"),
-        ("lenient", "Lenient execution accuracy"),
+        ("strict_effective", "Strict execution accuracy (scoreable items)"),
+        ("lenient", "Lenient execution accuracy (scoreable items)"),
     ]:
         b = int((paired[f"{column}_gpt"] & ~paired[f"{column}_qwen"]).sum())
         c = int((~paired[f"{column}_gpt"] & paired[f"{column}_qwen"]).sum())
@@ -161,7 +187,7 @@ def svg_bar_chart(path: Path, title: str, rows: list[dict], groups: list[str], m
         '<desc id="desc">Grouped bar chart of percentages by model and category.</desc>',
         '<rect width="100%" height="100%" fill="white"/>',
         f'<text x="{left}" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="700">{html.escape(title)}</text>',
-        f'<text x="{left}" y="62" font-family="Arial, sans-serif" font-size="13" fill="#475569">Strict excludes trivial empty-result matches; whiskers are 95% Wilson confidence intervals.</text>',
+        f'<text x="{left}" y="62" font-family="Arial, sans-serif" font-size="13" fill="#475569">Items whose gold query returns no rows are excluded as unscoreable; whiskers are 95% Wilson confidence intervals.</text>',
     ]
     for tick in range(0, 101, 20):
         y = top + plot_h - (tick / 100) * plot_h
@@ -203,14 +229,21 @@ def svg_bar_chart(path: Path, title: str, rows: list[dict], groups: list[str], m
     path.write_text("\n".join(chart), encoding="utf-8")
 
 
-def write_report(path: Path, rows: list[dict], tests: list[dict]) -> None:
+def write_report(path: Path, rows: list[dict], tests: list[dict],
+                 n_total: int, n_scoreable: int) -> None:
     overall = [r for r in rows if r["dimension"] == "overall" and r["metric"] != "Execution error rate"]
     lines = [
         "# Statistical analysis summary",
         "",
         "## Method",
         "",
-        "Accuracy intervals are 95% Wilson binomial confidence intervals. GPT and Qwen are compared using an exact two-sided paired McNemar test on the same 306 questions. A trivial empty-result match is counted as incorrect in the strict metric.",
+        f"Of the {n_total} sampled questions, {n_total - n_scoreable} are excluded as unscoreable: "
+        f"their gold query either fails to execute or returns zero rows, so no model answer can be "
+        f"distinguished as right or wrong against it. Whether a gold query returns rows depends only "
+        f"on the item and not on the model, so the same {n_scoreable} items are scored for both "
+        f"models and the pairing is preserved. Accuracy intervals are 95% Wilson binomial "
+        f"confidence intervals. GPT and Qwen are compared using an exact two-sided paired McNemar "
+        f"test over these {n_scoreable} items.",
         "",
         "## Overall results",
         "",
@@ -237,11 +270,14 @@ def write_report(path: Path, rows: list[dict], tests: list[dict]) -> None:
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     data = load_results()
+    data, n_total, n_scoreable = drop_unscoreable(data)
+    print(f"Scoreable items: {n_scoreable}/{n_total} "
+          f"({n_total - n_scoreable} dropped: gold fails or returns no rows)")
     rows = metric_rows(data)
     tests = paired_tests(data)
     write_csv(OUTPUT_DIR / "metric_summary.csv", rows)
     write_csv(OUTPUT_DIR / "paired_mcnemar_test.csv", tests)
-    write_report(OUTPUT_DIR / "statistical_summary.md", rows, tests)
+    write_report(OUTPUT_DIR / "statistical_summary.md", rows, tests, n_total, n_scoreable)
 
     metrics = ["Strict execution accuracy", "Lenient execution accuracy"]
     svg_bar_chart(OUTPUT_DIR / "accuracy_overall.svg", "Overall execution accuracy", rows, ["All questions"], metrics)
