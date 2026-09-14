@@ -2,10 +2,7 @@
 run_experiment.py
 
 Στρωματοποιημένη δειγματοληψία + πλήρες evaluation run + συνοπτικά
-στατιστικά. Πριν ξεκινήσει το (ενδεχομένως ακριβό/αργό) run, κάνει
-ΠΡΟ-ΕΛΕΓΧΟ ότι η βάση είναι πραγματικά προσβάσιμη -- ώστε να μη
-σπαταλήσουμε ξανά εκατοντάδες API calls σε ένα run που είναι
-καταδικασμένο να αποτύχει λόγω μη διαθέσιμης βάσης.
+στατιστικά. Πριν ξεκινήσει το run ελέγχει ότι η βάση είναι προσβάσιμη
 """
 
 import sys
@@ -99,8 +96,6 @@ def print_summary(results_df: pd.DataFrame) -> None:
     print(f"Trivial empty matches που αφαιρέθηκαν: {n_trivial}")
 
     # Lenient accuracy: αν υπάρχει η στήλη (νέα runs μετά το few-shot/lenient fix).
-    # ΧΩΡΙΣ trivial empty matches, ακριβώς όπως και το strict παραπάνω -- αλλιώς
-    # οι δύο μετρικές δεν είναι συγκρίσιμες μεταξύ τους.
     if "correct_lenient" in results_df.columns:
         n_lenient = (results_df["correct_lenient"]
                      & ~results_df["trivial_empty_match"]).sum()

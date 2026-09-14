@@ -4,8 +4,7 @@ score_qwen_results.py
 Παίρνει το qwen_results.csv (κατέβηκε από το Colab notebook, ήδη
 περιέχει το generated_sql για κάθε ερώτηση), εκτελεί το SQL τοπικά
 στη δική μας MySQL/MariaDB, συγκρίνει με το gold SQL, και τυπώνει
-ΤΗΝ ΙΔΙΑ αναφορά όπως το run_experiment.py (GPT) -- ώστε τα δύο
-αποτελέσματα να είναι απευθείας συγκρίσιμα.
+αναφορά όπως το run_experiment.py για το GPT
 
 Χρήση:
     python src/score_qwen_results.py
