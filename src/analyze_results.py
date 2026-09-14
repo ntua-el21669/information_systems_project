@@ -20,13 +20,8 @@ import math
 from collections import Counter
 from pathlib import Path
 from typing import Iterable
-
 import pandas as pd
 
-
-# Resolve project files relative to this script, not the caller's current
-# directory. This supports both `python src/analyze_results.py` from the
-# repository root and `python analyze_results.py` from `src/`.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = PROJECT_ROOT / "data" / "results"
 OUTPUT_DIR = RESULTS_DIR / "analysis"
@@ -39,7 +34,7 @@ COLORS = {"GPT-4o-mini": "#2563eb", "Qwen2.5-Coder-7B-Instruct": "#d97706"}
 
 
 def wilson_interval(successes: int, total: int, z: float = 1.96) -> tuple[float, float]:
-    """Return a two-sided 95% Wilson binomial confidence interval."""
+    """Return a two-sided 95% Wilson binomial confidence interval"""
     if total == 0:
         return float("nan"), float("nan")
     p = successes / total
@@ -50,7 +45,7 @@ def wilson_interval(successes: int, total: int, z: float = 1.96) -> tuple[float,
 
 
 def exact_mcnemar_p_value(b: int, c: int) -> float:
-    """Two-sided exact McNemar p-value; b/c are discordant-pair counts."""
+    """Two-sided exact McNemar p-value"""
     n = b + c
     if n == 0:
         return 1.0
@@ -70,15 +65,8 @@ def load_results() -> dict[str, pd.DataFrame]:
         if missing:
             raise ValueError(f"{path} is missing columns: {sorted(missing)}")
         # An item is SCOREABLE only if its gold query ran and returned rows.
-        # If gold returns nothing, the comparison cannot tell a correct model
-        # from an incorrect one -- every answer "agrees" with an empty
-        # reference. This is a property of the ITEM (the gold SQL), not of the
-        # model, so it is identical across models and can be dropped without
-        # breaking the pairing the McNemar test depends on.
         df["scoreable"] = (df["gold_execution_error"].isna()
                            & (df["gold_row_count"].fillna(0) > 0))
-        # The trivial mask is kept as a defensive no-op: on the scoreable
-        # subset a both-empty match cannot occur, since gold returned rows.
         trivial = df["trivial_empty_match"].fillna(False).astype(bool)
         df["strict_effective"] = df["correct"].fillna(False).astype(bool) & ~trivial
         df["lenient"] = df["correct_lenient"].fillna(False).astype(bool) & ~trivial
@@ -88,7 +76,7 @@ def load_results() -> dict[str, pd.DataFrame]:
 
 
 def drop_unscoreable(data: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame], int, int]:
-    """Drop items whose gold query returns nothing; verify the models agree on which."""
+    """Drop items whose gold query returns nothing"""
     masks = {m: df["scoreable"].reset_index(drop=True) for m, df in data.items()}
     reference_model, reference = next(iter(masks.items()))
     for model, mask in masks.items():
@@ -96,8 +84,7 @@ def drop_unscoreable(data: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFr
             raise ValueError(
                 f"Scoreable items differ between {reference_model} and {model} "
                 f"({int(reference.sum())} vs {int(mask.sum())}). Whether a gold query "
-                "returns rows must not depend on the model; re-score both files "
-                "against the same database before analysing."
+                "returns rows must not depend on the model"
             )
     kept = {m: df[df["scoreable"]].reset_index(drop=True) for m, df in data.items()}
     return kept, len(reference), int(reference.sum())
@@ -128,11 +115,8 @@ def metric_rows(data: dict[str, pd.DataFrame]) -> list[dict]:
 def paired_tests(data: dict[str, pd.DataFrame]) -> list[dict]:
     gpt = data["GPT-4o-mini"].copy()
     qwen = data["Qwen2.5-Coder-7B-Instruct"].copy()
-
     # Public text-to-SQL corpora contain repeated identical question/SQL pairs.
     # Pair the first occurrence of each repeated key with the first occurrence
-    # in the other model file, etc.  The two files are generated from the same
-    # fixed sample; verify the multiplicities before making this pairing.
     gpt_counts = Counter(map(tuple, gpt[KEY_COLUMNS].itertuples(index=False, name=None)))
     qwen_counts = Counter(map(tuple, qwen[KEY_COLUMNS].itertuples(index=False, name=None)))
     if gpt_counts != qwen_counts:
@@ -172,7 +156,7 @@ def write_csv(path: Path, rows: Iterable[dict]) -> None:
 
 
 def svg_bar_chart(path: Path, title: str, rows: list[dict], groups: list[str], metrics: list[str]) -> None:
-    """Draw a grouped, labelled SVG bar chart without an external plotting dependency."""
+    """Draw a SVG bar chart """
     width, height = 1080, 620
     left, right, top, bottom = 90, 30, 88, 115
     plot_w, plot_h = width - left - right, height - top - bottom

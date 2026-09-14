@@ -26,7 +26,7 @@ load_dotenv()
 
 _client = OpenAI()  # διαβάζει αυτόματα το OPENAI_API_KEY από το environment
 
-DEFAULT_GPT_MODEL = "gpt-4o-mini"  # φθηνό, γρήγορο, αρκετά καλό για text-to-SQL
+DEFAULT_GPT_MODEL = "gpt-4o-mini"
 
 
 SYSTEM_PROMPT = """You are a text-to-SQL assistant. Given a database schema \
@@ -51,7 +51,6 @@ def _clean_sql_output(raw_text: str) -> str:
     το καθαρό SQL string.
     """
     text = raw_text.strip()
-    # Αφαίρεση ```sql ... ``` ή ``` ... ``` αν υπάρχουν
     text = re.sub(r"^```sql\s*", "", text, flags=re.IGNORECASE)
     text = re.sub(r"^```\s*", "", text)
     text = re.sub(r"```\s*$", "", text)
@@ -65,8 +64,6 @@ def generate_sql_gpt(
     max_retries: int = 3,
 ) -> dict:
     """
-    Καλεί το GPT (μέσω OpenAI API) για να παράξει SQL από μια ερώτηση.
-
     Επιστρέφει ένα dict με:
         - "sql": το παραγόμενο SQL (string, καθαρισμένο)
         - "latency_seconds": πόσος χρόνος πήρε η κλήση

@@ -6,18 +6,6 @@ schema (7 tables: state, city, river, mountain, lake, border_info,
 highlow). Φτιάχτηκαν σκόπιμα πιο σύνθετες από το αυθεντικό
 geography.json dataset -- πολλαπλά JOINs, nested subqueries με
 2+ επίπεδα, GROUP BY + HAVING, συγκρίσεις μεταξύ ομάδων.
-
-Στόχος: κάλυψη της απαίτησης της εκφώνησης για "δημιουργία δικών
-σας πιο σύνθετων SQL ερωτημάτων", πέρα από τα έτοιμα public datasets.
-
-Έξοδος: CSV στην ΙΔΙΑ μορφή με τα υπόλοιπα processed datasets
-(dataset, query_split, question_split, question, gold_sql, difficulty)
-ώστε να ενσωματώνεται απευθείας στο ίδιο evaluation pipeline.
-
-ΣΗΜΑΝΤΙΚΟ: Πριν εμπιστευτείς αυτά τα queries ως "gold" σωστά,
-έτρεξέ τα ΧΕΙΡΟΚΙΝΗΤΑ στο DBeaver πάνω στο geography database
-(και MySQL και MariaDB) για να επιβεβαιώσεις ότι επιστρέφουν
-λογικά αποτελέσματα.
 """
 
 import sys
@@ -239,15 +227,6 @@ CUSTOM_QUERIES = [
 
 # ---------------------------------------------------------------------------
 # ATIS custom queries
-#
-# ΣΗΜΑΝΤΙΚΟ: Στο ATIS schema, ΤΟΣΟ τα table names ΟΣΟ ΚΑΙ τα column names
-# είναι πεζά (π.χ. flight, from_airport) -- διαφορετικά από το Geography,
-# όπου μόνο τα tables ήταν πεζά αλλά τα columns κεφαλαία. Επιβεβαιώθηκε
-# απευθείας μέσα από το atis-db.sql (CREATE TABLE statements).
-#
-# Επίσης: string values μέσα στα δεδομένα (π.χ. city names) είναι σε
-# ΚΕΦΑΛΑΙΑ (π.χ. 'ATLANTA', 'BOSTON'), σε αντίθεση με το Geography όπου
-# ήταν πεζά (π.χ. 'texas').
 # ---------------------------------------------------------------------------
 
 ATIS_CUSTOM_QUERIES = [
@@ -354,17 +333,6 @@ ATIS_CUSTOM_QUERIES = [
 
 # ---------------------------------------------------------------------------
 # Advising custom queries
-#
-# ΣΗΜΑΝΤΙΚΟ: Στο Advising schema, τα TABLE names είναι ΚΕΦΑΛΑΙΑ
-# (επιβεβαιώθηκε με SHOW TABLES: COURSE, STUDENT, PROGRAM, κλπ) --
-# διαφορετικά από το ATIS (όλα πεζά) και το Geography (μόνο tables πεζά).
-#
-# Τα COLUMN names δεν χρειάζεται να ταιριάζουν σε case -- η MySQL δεν
-# κάνει ποτέ διάκριση πεζών/κεφαλαίων σε column names, ανεξαρτήτως OS.
-# Μόνο τα table names είναι ευαίσθητα σε case (στο Linux, ανάλογα με τη
-# server config). Γι' αυτό εδώ γράφουμε τα columns όπως εμφανίζονται στο
-# advising-db.sql (μερικά tables π.χ. COURSE/INSTRUCTOR έχουν κεφαλαία
-# columns, άλλα π.χ. STUDENT/PROGRAM έχουν πεζά -- και τα δύο δουλεύουν).
 # ---------------------------------------------------------------------------
 
 ADVISING_CUSTOM_QUERIES = [

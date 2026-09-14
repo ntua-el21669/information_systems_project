@@ -6,13 +6,6 @@ summary.py
     - πόσες γραμμές έχει κάθε dataset
     - κατανομή δυσκολίας (easy/medium/hard) ανά dataset
     - συνολικά νούμερα
-
-Τρέξε το ΑΦΟΥ έχεις ήδη τρέξει τον data_loader.py και για τα 3
-datasets (geography, atis, advising), ώστε να υπάρχουν τα
-αντίστοιχα .csv αρχεία μέσα στο data/processed/.
-
-Σημείωση: όλα τα print() είναι σκόπιμα στα Αγγλικά, για να
-αποφύγουμε UnicodeEncodeError σε Windows terminals (cp1252).
 """
 
 import pandas as pd
@@ -25,8 +18,6 @@ OUTPUT_PATH = PROCESSED_DIR / "all_datasets_combined.csv"
 
 def load_all_processed() -> pd.DataFrame:
     """Διαβάζει όλα τα *.csv μέσα στο data/processed/ (και υποφακέλους) και τα ενώνει σε ένα DataFrame."""
-    # Σύγκριση με resolve() (όχι με .name), ώστε να μη μπερδευτεί ένα
-    # ομώνυμο αρχείο σε υποφάκελο με το πραγματικό output.
     output_path = OUTPUT_PATH.resolve()
     csv_files = [
         f for f in sorted(PROCESSED_DIR.rglob("*.csv"))

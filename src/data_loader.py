@@ -3,7 +3,7 @@ data_loader.py
 
 Μετατρέπει ένα JSON αρχείο από το text2sql-data repo
 (π.χ. geography.json, atis.json, restaurants.json) σε μια
-απλή, ενιαία μορφή: μία γραμμή ανά (ερώτηση, SQL) ζευγάρι,
+απλή μορφή: μία γραμμή ανά (ερώτηση, SQL) ζευγάρι,
 με τις μεταβλητές ήδη αντικατεστημένες με πραγματικές τιμές.
 
 Μορφή εισόδου (text2sql-data):
@@ -39,26 +39,14 @@ from pathlib import Path
 
 def fill_template(template: str, variables: dict) -> str:
     """
-    Αντικαθιστά μέσα σε ένα string (SQL ή question) κάθε εμφάνιση
-    ενός ονόματος μεταβλητής (π.χ. state_name0) με την πραγματική
-    τιμή του (π.χ. texas), βάζοντας quotes γύρω από την τιμή στο SQL
-    ΜΟΝΟ αν στο template η μεταβλητή βρισκόταν ήδη μέσα σε quotes.
-
-    Απλή προσέγγιση: αντικαθιστούμε "var_name" (με τα εισαγωγικά
-    του template) με "value" (νέα εισαγωγικά + τιμή), και όποιο
-    var_name έχει μείνει χωρίς quotes (π.χ. μέσα σε ερώτηση) το
-    αντικαθιστούμε σκέτο.
+    Αντικαθιστά μέσα σε ένα string κάθε εμφάνιση
+    ενός ονόματος μεταβλητής με την πραγματική τιμή του.
     """
     result = template
     for var_name, var_value in variables.items():
         # 1. Περίπτωση: η μεταβλητή εμφανίζεται μέσα σε διπλά εισαγωγικά
         #    στο SQL, π.χ.  "state_name0"
         result = result.replace(f'"{var_name}"', f'"{var_value}"')
-        # 2. Ό,τι έμεινε χωρίς εισαγωγικά (π.χ. σε ερώτηση σε φυσική
-        #    γλώσσα, ή αριθμητική μεταβλητή στο SQL) -> απλή αντικατάσταση
-        #    λέξης-προς-λέξη (word boundary) ώστε να μην πειράξουμε
-        #    π.χ. state_name0 μέσα σε state_name01 (δεν υπάρχει εδώ,
-        #    αλλά είναι καλή πρακτική).
         result = re.sub(rf'\b{re.escape(var_name)}\b', str(var_value), result)
     return result
 
@@ -68,17 +56,15 @@ def estimate_difficulty(sql: str) -> str:
     Εκτιμά αυτόματα το επίπεδο δυσκολίας ενός SQL query
     ("easy" / "medium" / "hard") με βάση απλά, μετρήσιμα
     χαρακτηριστικά πολυπλοκότητας:
-
         - πόσα tables εμπλέκονται (μέσω "AS <alias>")
         - αν υπάρχει nested subquery (δεύτερο SELECT)
         - αν χρησιμοποιείται aggregate function (COUNT/MAX/MIN/AVG/SUM)
         - αν υπάρχει GROUP BY / HAVING / ORDER BY
         - πόσες συνθήκες υπάρχουν στο WHERE (μέσω AND/OR)
 
+
     Κάθε χαρακτηριστικό προσθέτει "πόντους" σε ένα σκορ
-    πολυπλοκότητας, και το τελικό σκορ μεταφράζεται σε κατηγορία.
-    Δεν είναι "τέλειο" (δεν κάνει πραγματικό SQL parsing), αλλά
-    δίνει μια λογική, αναπαραγώγιμη εκτίμηση δυσκολίας.
+    πολυπλοκότητας και το τελικό σκορ μεταφράζεται σε κατηγορία.
     """
     sql_upper = sql.upper()
 
@@ -134,8 +120,6 @@ def load_dataset(json_path: str, dataset_name: str) -> pd.DataFrame:
     rows = []
     for entry in entries:
         query_split = entry.get("query-split", "")
-        # Χρησιμοποιούμε πάντα το ΠΡΩΤΟ SQL variant, όπως προτείνει
-        # το README του text2sql-data ("we only use the first query")
         sql_template = entry["sql"][0]
 
         for sentence in entry["sentences"]:
@@ -159,7 +143,6 @@ def load_dataset(json_path: str, dataset_name: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     # Λίστα με όλα τα public datasets που θέλουμε να επεξεργαστούμε.
-    # Κάθε entry: (όνομα dataset, path στο .json input, path στο .csv output)
     DATASETS = [
         ("geography", "data/raw/geography/geography.json", "data/processed/geography.csv"),
         ("atis",      "data/raw/atis/atis.json",            "data/processed/atis.csv"),

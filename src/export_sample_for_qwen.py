@@ -1,11 +1,8 @@
 """
 export_sample_for_qwen.py
 
-Εξάγει το ΙΔΙΟ στρωματοποιημένο δείγμα ερωτήσεων που χρησιμοποιήσαμε ήδη
-για το GPT run, μαζί με το schema description (ΠΕΡΙΛΑΜΒΑΝΟΜΕΝΟΥ του ίδιου
-few-shot example που βλέπει και το GPT, μέσω build_augmented_schema) --
-έτσι το Colab notebook δεν χρειάζεται πρόσβαση στη βάση μας, ΚΑΙ η
-σύγκριση GPT vs Qwen παραμένει δίκαιη (ίδιο prompt-context και στα δύο).
+Εξάγει το ΙΔΙΟ στρωματοποιημένο δείγμα ερωτήσεων που χρησιμοποιήσαμε ήδη για το GPT run
+μαζί με το schema description έτσι το Colab notebook δεν χρειάζεται πρόσβαση στη βάση
 
 Χρήση:
     python src/export_sample_for_qwen.py
@@ -39,8 +36,7 @@ if __name__ == "__main__":
     for database_name in unique_databases:
         conn = connect(database=database_name, **MYSQL_CONFIG)
         raw_schema = get_schema_description(conn, database_name)
-        # ΙΔΙΟ few-shot example με αυτό που βλέπει το GPT (evaluate_single),
-        # ώστε η σύγκριση GPT vs Qwen να είναι δίκαιη
+        # σύγκριση GPT vs Qwen να είναι δίκαιη
         schema_by_database[database_name] = build_augmented_schema(database_name, raw_schema)
         conn.close()
 
