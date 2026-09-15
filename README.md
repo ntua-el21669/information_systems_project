@@ -13,7 +13,6 @@
 - [Αποτελέσματα](#αποτελέσματα)
 - [Στατιστική Σημαντικότητα](#στατιστική-σημαντικότητα)
 - [Γνωστοί Περιορισμοί](#γνωστοί-περιορισμοί)
-- [Κατάσταση Παραδοτέων](#κατάσταση-παραδοτέων)
 
 ---
 
@@ -35,11 +34,13 @@ docker run --name mariadb-db -e MYSQL_ROOT_PASSWORD=1234 -p 3307:3306 -d mariadb
 - MySQL: `localhost:3306`
 - MariaDB: `localhost:3307`
 
+Στο σημείο αυτό τα containers τρέχουν αλλά είναι **κενά** — δεν περιέχουν ακόμα κανένα table ή δεδομένα.
+
 ### Φόρτωση δεδομένων στις βάσεις
 
 Κάθε ένα από τα 3 datasets (`geography`, `atis`, `advising`) πρέπει να δημιουργηθεί ως ξεχωριστό database **και στις δύο** βάσεις (MySQL, MariaDB), και να φορτωθεί με το αντίστοιχο `-db.sql` αρχείο του από το `data/raw/<dataset>/`.
 
-**Βήμα 1 — Δημιούργησε τα 3 databases και στις δύο βάσεις.** Μπορείς να το κάνεις είτε γραφικά (DBeaver), είτε από τη γραμμή εντολών:
+**Βήμα 1 — Δημιούργησε τα 3 databases και στις δύο βάσεις:**
 
 ```bash
 docker exec -i mysql-db mysql -uroot -p1234 -e "CREATE DATABASE geography; CREATE DATABASE atis; CREATE DATABASE advising;"
@@ -60,7 +61,7 @@ Get-Content "data\raw\advising\advising-db.sql" | docker exec -i mysql-db mysql 
 Get-Content "data\raw\advising\advising-db.sql" | docker exec -i mariadb-db mariadb -uroot -p1234 advising
 ```
 
-Σε **macOS/Linux (bash)**, αντικατέστησε το `Get-Content "..." |` με `cat ... |`, π.χ.:
+Σε **macOS/Linux (bash)**, αντικατέστησε το `Get-Content "..." |` με `cat ... |`:
 ```bash
 cat data/raw/geography/geography-db.sql | docker exec -i mysql-db mysql -uroot -p1234 geography
 ```
@@ -78,12 +79,12 @@ cat data/raw/geography/geography-db.sql | docker exec -i mysql-db mysql -uroot -
 docker exec -it mysql-db mysql -uroot -p1234 geography -e "SHOW TABLES;"
 ```
 
-Ή, ισοδύναμα, μέσω Python (χρησιμοποιεί ήδη τη σύνδεση που ορίζει το pipeline):
+Ή μέσω Python:
 ```bash
 python -c "import sys; sys.path.insert(0,'src'); from db_executor import connect, MYSQL_CONFIG, get_schema_description; conn = connect(database='geography', **MYSQL_CONFIG); print(get_schema_description(conn, 'geography')); conn.close()"
 ```
 
-⚠️ **Σημαντικό:** τα table names είναι case-sensitive στο Linux MySQL/MariaDB. Το `geography`/`atis` έχουν πεζά table names, ενώ το `advising` έχει κεφαλαία, αυτό χειρίζεται ήδη αυτόματα ο κώδικας (`db_executor.normalize_table_case`), δεν χρειάζεται καμία χειροκίνητη ενέργεια, απλά αναφέρεται εδώ για πληρότητα.
+⚠️ **Σημαντικό:** τα table names είναι case-sensitive στο Linux MySQL/MariaDB. Το `geography`/`atis` έχουν πεζά table names, ενώ το `advising` έχει κεφαλαία — αυτό χειρίζεται ήδη αυτόματα ο κώδικας (`db_executor.normalize_table_case`), δεν χρειάζεται καμία χειροκίνητη ενέργεια.
 
 ### Python dependencies
 
@@ -93,7 +94,7 @@ pip install -r requirements.txt
 
 ### OpenAI API key
 
-Δημιούργησε ένα `.env` αρχείο στη ρίζα
+Δημιούργησε ένα `.env` αρχείο στη ρίζα (δεν committάρεται, βλ. `.gitignore`):
 
 ```
 OPENAI_API_KEY=sk-proj-...
@@ -101,7 +102,7 @@ OPENAI_API_KEY=sk-proj-...
 
 ### Qwen (Google Colab)
 
-Το Qwen2.5-Coder-7B-Instruct (4-bit quantized) τρέχει ξεχωριστά σε Google Colab με δωρεάν T4 GPU, αφού δεν υπάρχει τοπική πρόσβαση σε GPU. Βλ. ενότητα [Evaluation Pipeline](#evaluation-pipeline).
+Το Qwen2.5-Coder-7B-Instruct (4-bit quantized) τρέχει ξεχωριστά σε Google Colab με δωρεάν T4 GPU, αφού δεν υπάρχει τοπική πρόσβαση σε GPU. Το notebook (`notebooks/qwen_text2sql_setup.ipynb`) φορτώνει το μοντέλο και εκθέτει μια `generate_sql_qwen()` function με το ίδιο interface όπως το GPT-side.
 
 ---
 
@@ -116,17 +117,19 @@ information_systems_project/
 │   ├── llm_client.py              # GPT-side: κλήση OpenAI API
 │   ├── db_executor.py             # Σύνδεση/εκτέλεση SQL, auto-schema, σύγκριση αποτελεσμάτων
 │   ├── evaluator.py                # Ενώνει LLM + DB σε πλήρες evaluation βήμα
-│   ├── run_experiment.py          # Στρωματοποιημένο δείγμα + πλήρες GPT run
-│   ├── export_sample_for_qwen.py  # Εξαγωγή δείγματος (+ schema) για το Colab
+│   ├── run_experiment.py          # Δειγματοληψία (build_full_sample) + πλήρες GPT run
+│   ├── export_sample_for_qwen.py  # Εξαγωγή του ΙΔΙΟΥ δείγματος (+ schema) για το Colab
 │   ├── score_qwen_results.py      # Βαθμολόγηση αποτελεσμάτων Qwen (μετά το Colab)
 │   ├── rescore_against_db.py      # Επανα-εκτέλεση ήδη-παραγόμενου SQL σε άλλη βάση
 │   └── analyze_results.py         # Στατιστική ανάλυση (Wilson CI, McNemar test) + γραφήματα
+├── notebooks/
+│   └── qwen_text2sql_setup.ipynb  # Colab notebook: φόρτωση Qwen (4-bit) + batch inference
 ├── data/
 │   ├── raw/                       # Ωμά datasets (geography, atis, advising: .json + -db.sql)
 │   ├── processed/                 # Καθαρά CSV (ανά dataset + ενοποιημένο all_datasets_combined.csv)
 │   └── results/
 │       ├── results_*.csv          # Τελικά αποτελέσματα αξιολόγησης (4 combos)
-│       ├── sample_for_qwen.csv    # Το στρωματοποιημένο δείγμα (306 ερωτήσεις) με schema
+│       ├── sample_for_qwen.csv    # Το δείγμα ερωτήσεων (331) με schema, όπως εξήχθη για το Colab
 │       ├── qwen_results_raw.csv   # Ωμή έξοδος Qwen από το Colab, πριν το scoring
 │       └── analysis/              # Στατιστική ανάλυση + γραφήματα
 │           ├── accuracy_overall.svg
@@ -136,7 +139,7 @@ information_systems_project/
 │           ├── paired_mcnemar_test.csv
 │           └── statistical_summary.md
 ├── docs/
-│   └── LLMSQL3_Report.docx        # Αναφορά project
+│   └── LLMSQL3_Report.docx        # Τελική γραπτή αναφορά (IEEE format)
 ├── requirements.txt
 ├── .gitignore
 └── README.md
@@ -159,7 +162,7 @@ information_systems_project/
 | Advising | 4,387 | Μαθήματα φοιτητών, 15 tables, ισορροπημένο |
 | Custom (3 schemas) | 31 | Δικές μας complex ερωτήσεις, επαληθευμένες χειροκίνητα |
 
-**Σύνολο: 10,575 (ερώτηση, SQL) pairs**, με αυτόματο labeling δυσκολίας (easy/medium/hard) βάσει heuristic πάνω στην πολυπλοκότητα του SQL (πλήθος tables, nested subqueries, aggregate functions, GROUP BY/HAVING κλπ).
+**Σύνολο: 10,575 (ερώτηση, SQL) pairs**, με αυτόματο labeling δυσκολίας (easy/medium/hard) βάσει heuristic πάνω στην πολυπλοκότητα του SQL.
 
 ### Πώς να αναπαράγεις το data preparation
 
@@ -173,33 +176,15 @@ python src/summary.py            # ενοποιεί τα πάντα -> all_datas
 
 ## Evaluation Pipeline
 
-### Αρχιτεκτονική
-
-```
-ερώτηση + schema → LLM (GPT/Qwen) → generated SQL
-                                          │
-                          ┌───────────────┴───────────────┐
-                          ▼                                ▼
-                  Εκτέλεση στη βάση                Εκτέλεση gold SQL
-                          │                                │
-                          └───────────────┬────────────────┘
-                                           ▼
-                         Σύγκριση αποτελεσμάτων (strict + lenient)
-                                           │
-                                           ▼
-                    analyze_results.py: Wilson CI + McNemar test + γραφήματα
-```
-
 ### Βασικές τεχνικές αποφάσεις
 
-- **Execution accuracy** αντί για string matching (πιο αξιόπιστο, δύο διαφορετικά γραμμένα SQL μπορεί να είναι εξίσου σωστά).
-- **Δύο μετρικές ανά ερώτηση**:
-  - *Strict*: τα αποτελέσματα πρέπει να ταιριάζουν ακριβώς (ίδιες στήλες/τιμές).
-  - *Lenient*: επιτρέπει στο LLM να επιστρέψει επιπλέον στήλες, αρκεί να περιέχουν όλες τις σωστές τιμές.
-- **`trivial_empty_match` flag**: αν gold και generated SQL επιστρέφουν *και τα δύο* 0 γραμμές, δεν το μετράμε ως "πραγματικά σωστό" (θα φούσκωνε ψευδώς το accuracy) — εξαιρείται ρητά από τη στατιστική ανάλυση.
-- **Αυτόματη παραγωγή schema description** από το ίδιο το `information_schema` της βάσης (όχι χειρόγραφα ανά dataset).
-- **Ένα few-shot παράδειγμα ανά schema** μέσα στο prompt, ώστε το LLM να μάθει τις συμβάσεις της κάθε βάσης.
-- **Στρωματοποιημένη δειγματοληψία** (306 ερωτήσεις, stratified by dataset × difficulty) για στατιστικά αντιπροσωπευτικό αλλά οικονομικά εφικτό evaluation.
+- **Execution accuracy** αντί για string matching.
+- **Δύο μετρικές ανά ερώτηση**: *strict* (ίδιες στήλες/τιμές ακριβώς) και *lenient* (επιτρέπει επιπλέον στήλες, αρκεί να περιέχουν όλες τις σωστές τιμές).
+- **`trivial_empty_match` flag**: αν gold και generated SQL επιστρέφουν *και τα δύο* 0 γραμμές, δεν μετράμε ψευδώς ως "σωστό".
+- **Unscoreable items**: αποκλείονται **μόνο** ερωτήσεις όπου το ίδιο το gold SQL αποτυγχάνει να εκτελεστεί· ερωτήσεις όπου το gold νόμιμα επιστρέφει 0 γραμμές **παραμένουν** και βαθμολογούνται κανονικά.
+- **Αυτόματη παραγωγή schema description** από το `information_schema` της βάσης.
+- **Ένα few-shot παράδειγμα ανά schema** μέσα στο prompt.
+- **Δειγματοληψία (`build_full_sample`)**: στρωματοποιημένο δείγμα ~300 ερωτήσεων από τα 3 δημόσια datasets (by dataset × difficulty), **συν όλα τα 31 custom queries επιπλέον** — ώστε τα custom queries (ρητή απαίτηση της εκφώνησης) να έχουν πάντα πλήρη αντιπροσώπευση, ανεξάρτητα από το πόσο μικρά είναι σε σχέση με τα δημόσια datasets. Τελικό μέγεθος δείγματος: **331 ερωτήσεις**.
 
 ### Πώς να τρέξεις πλήρες evaluation (και τα 4 combos)
 
@@ -213,8 +198,8 @@ python src/rescore_against_db.py data/results/results_gpt-4o-mini_mysql.csv mari
 # 3. Εξαγωγή του ΙΔΙΟΥ δείγματος για Qwen (με schema + few-shot example)
 python src/export_sample_for_qwen.py
 
-# 4. Ανέβασε το data/results/sample_for_qwen.csv στο Colab notebook,
-#    τρέξε το Qwen (batch mode), κατέβασε το qwen_results_raw.csv
+# 4. Ανέβασε το data/results/sample_for_qwen.csv στο notebooks/qwen_text2sql_setup.ipynb
+#    (Google Colab), τρέξε το Qwen (batch mode), κατέβασε ως data/results/qwen_results_raw.csv
 
 # 5. Qwen x MySQL
 python src/score_qwen_results.py
@@ -226,66 +211,76 @@ python src/rescore_against_db.py data/results/results_qwen2.5-coder-7b_mysql.csv
 python src/analyze_results.py
 ```
 
-**Σημείωση:** μόνο **2 πραγματικές γεννήσεις SQL** χρειάζονται (1 GPT API pass + 1 Qwen Colab pass) για να καλυφθούν και τα 4 combos, αφού το schema είναι δομικά πανομοιότυπο σε MySQL/MariaDB — το ίδιο SQL απλά ξανατρέχει στη δεύτερη βάση.
+**Σημείωση:** μόνο **2 πραγματικές γεννήσεις SQL** χρειάζονται (1 GPT API pass + 1 Qwen Colab pass) για να καλυφθούν και τα 4 combos, αφού το schema είναι δομικά πανομοιότυπο σε MySQL/MariaDB.
 
 ---
 
 ## Αποτελέσματα
 
-Δείγμα: 306 στρωματοποιημένες ερωτήσεις (ίδιες και για τα 4 combos). Πλήρη στατιστικά στο [`data/results/analysis/statistical_summary.md`](data/results/analysis/statistical_summary.md).
+Δείγμα: **331 ερωτήσεις** (~300 στρωματοποιημένες από τα 3 δημόσια datasets + όλα τα 31 custom queries), από τις οποίες **325 (MySQL) / 328 (MariaDB)** είναι scoreable. Πλήρη στατιστικά στο [`data/results/analysis/statistical_summary.md`](data/results/analysis/statistical_summary.md).
 
-### Overall execution accuracy (95% Wilson confidence intervals)
+### Overall execution accuracy (95% Wilson confidence intervals, N=325)
 
 | Μοντέλο | Μετρική | Αποτέλεσμα | 95% CI |
 |---|---|---:|---:|
-| GPT-4o-mini | Strict | 41/306 (13.4%) | 10.0%–17.7% |
-| GPT-4o-mini | Lenient | 123/306 (40.2%) | 34.9%–45.8% |
-| Qwen2.5-Coder-7B-Instruct | Strict | 31/306 (10.1%) | 7.2%–14.0% |
-| Qwen2.5-Coder-7B-Instruct | Lenient | 91/306 (29.7%) | 24.9%–35.1% |
+| GPT-4o-mini | Strict | 50/325 (15.4%) | 11.9%–19.7% |
+| GPT-4o-mini | Lenient | 61/325 (18.8%) | 14.9%–23.4% |
+| Qwen2.5-Coder-7B-Instruct | Strict | 36/325 (11.1%) | 8.1%–15.0% |
+| Qwen2.5-Coder-7B-Instruct | Lenient | 44/325 (13.5%) | 10.2%–17.7% |
 
 ### Λοιπές μετρικές
 
 | Metric | GPT×MySQL | GPT×MariaDB | Qwen×MySQL | Qwen×MariaDB |
 |---|---|---|---|---|
-| Μέσο generation latency | 1.64s | 1.64s | 4.96s | 4.96s |
-| Execution errors (syntax) | 42/306 | 42/306 | 98/306 | 99/306 |
+| Strict accuracy | 15.4% (50/325) | 15.2% (50/328) | 11.1% (36/325) | 11.0% (36/328) |
+| Lenient accuracy | 18.8% (61/325) | 18.6% (61/328) | 13.5% (44/325) | 13.4% (44/328) |
+| Μέσο generation latency | 1.08s | 1.08s | 4.87s | 4.87s |
+| Execution errors (syntax) | 44/325 (13.5%) | 44/328 (13.4%) | 102/325 (31.4%) | 104/328 (31.7%) |
 
-### Accuracy ανά dataset και δυσκολία
+### Accuracy ανά dataset (strict / lenient, MySQL)
+
+| Dataset | n | GPT-4o-mini | Qwen2.5-Coder-7B |
+|---|---|---|---|
+| Geography | 25 | 64.0% / 68.0% | 64.0% / 64.0% |
+| Advising | 122 | 11.5% / 12.3% | 5.7% / 7.4% |
+| ATIS | 148 | 8.1% / 12.8% | 2.7% / 5.4% |
+| Custom — Geography | 15 | 46.7% / 53.3% | 40.0% / 53.3% |
+| Custom — ATIS | 7 | 14.3% / 14.3% | 14.3% / 14.3% |
+| Custom — Advising | 8 | 0.0% / 12.5% | 25.0% / 25.0% |
 
 Βλ. γραφήματα: [`accuracy_by_dataset.svg`](data/results/analysis/accuracy_by_dataset.svg), [`accuracy_by_difficulty.svg`](data/results/analysis/accuracy_by_difficulty.svg).
 
 ### Βασικά ευρήματα
 
-- **GPT νικά το Qwen** σε accuracy (strict και lenient) και είναι ~3x πιο γρήγορο.
-- **Qwen κάνει διπλάσια syntax errors**, αναμενόμενο για ένα μικρότερο, τοπικά τρέχον, quantized μοντέλο.
-- **Το RDBMS (MySQL vs MariaDB) δεν επηρεάζει το accuracy**, λογικό, αφού το SQL και τα δεδομένα είναι πανομοιότυπα· επηρεάζει ελαφρώς μόνο το execution latency.
-- **Μεγάλο strict→lenient χάσμα στο Advising** (και στα δύο LLMs), δείχνει ότι τα LLMs συχνά "καταλαβαίνουν" σωστά την ερώτηση αλλά επιστρέφουν επιπλέον/διαφορετικές στήλες απ' ό,τι το gold SQL.
-- **ATIS παραμένει δύσκολο ακόμα και στο lenient**, οφείλεται σε γνωστές ιδιαιτερότητες του πρωτότυπου dataset (hardcoded ημερομηνίες 1991, μη-κυριολεκτικές gold απαντήσεις).
-- **Μη-μονότονο easy/medium/hard μοτίβο**: το accuracy στο "medium" είναι χαμηλότερο απ' ό,τι στο "hard", ένδειξη ότι η αυτόματη (heuristic) κατηγοριοποίηση δυσκολίας δεν αντιστοιχεί τέλεια στην πραγματική δυσκολία μιας ερώτησης για το LLM.
+- **GPT νικά το Qwen** σε accuracy (strict και lenient), με στατιστικά σημαντική διαφορά και στις δύο μετρικές, και είναι ~4.5x πιο γρήγορο.
+- **Qwen κάνει σχεδόν διπλάσια syntax errors** — αναμενόμενο για ένα μικρότερο, τοπικά τρέχον, quantized μοντέλο.
+- **Το RDBMS (MySQL vs MariaDB) δεν επηρεάζει ουσιαστικά το accuracy** — επηρεάζει ελαφρώς μόνο ποια συγκεκριμένα gold queries εκτελούνται (dialect-level διαφορές) και το execution latency.
+- **Geography είναι το πιο "εύκολο" dataset**, ενώ το ATIS το πιο δύσκολο — λογικό μοτίβο.
+- **Μη-μονότονο easy/medium/hard μοτίβο**: ένδειξη ότι η αυτόματη κατηγοριοποίηση δυσκολίας δεν αντιστοιχεί τέλεια στην πραγματική δυσκολία μιας ερώτησης.
 
 ---
 
 ## Στατιστική Σημαντικότητα
 
-Σύγκριση GPT vs Qwen με **exact two-sided paired McNemar test** πάνω στις ίδιες 306 ερωτήσεις (κατάλληλο για paired comparison, αφού τα δύο μοντέλα αξιολογούνται στο ίδιο ακριβώς δείγμα):
+Σύγκριση GPT vs Qwen με **exact two-sided paired McNemar test** πάνω στις ίδιες 325 scoreable ερωτήσεις:
 
 | Μετρική | GPT-only correct | Qwen-only correct | p-value | Σημαντικό (α=0.05); |
 |---|---:|---:|---:|:---:|
-| Strict (χωρίς trivial matches) | 18 | 8 | 0.0755 | **Όχι** |
-| Lenient | 43 | 11 | 0.000014 | **Ναι** |
+| Strict | 22 | 8 | 0.0161 | **Ναι** |
+| Lenient | 26 | 9 | 0.0060 | **Ναι** |
 
-**Ερμηνεία:** Με την αυστηρή μετρική, η υπεροχή του GPT δεν μπορεί να θεωρηθεί στατιστικά αποδεδειγμένη σε αυτό το μέγεθος δείγματος. Με την πιο ανεκτική (lenient) μετρική, η υπεροχή του GPT είναι στατιστικά πολύ ισχυρή. Αυτή η αντίθεση δείχνει πόσο ουσιαστικά επηρεάζει η επιλογή μετρικής τα τελικά συμπεράσματα.
+**Ερμηνεία:** Και με τις δύο μετρικές, η υπεροχή του GPT-4o-mini έναντι του Qwen2.5-Coder-7B είναι στατιστικά σημαντική στο επίπεδο α=0.05.
 
 ---
 
 ## Γνωστοί Περιορισμοί
 
-- **Zero-shot / ελάχιστο few-shot**: μόνο 1 παράδειγμα ανά schema· περισσότερα παραδείγματα πιθανότατα θα βελτίωναν σημαντικά το accuracy.
-- **Strict metric ευαίσθητο σε επιπλέον στήλες**: ένα σημασιολογικά σωστό SQL μπορεί να "αποτύχει" αν επιστρέφει περισσότερη πληροφορία απ' όσο ζητήθηκε, γι' αυτό αναφέρουμε πάντα strict *και* lenient.
-- **`trivial_empty_match`**: δύο ερωτήματα που και τα δύο επιστρέφουν 0 γραμμές (για εντελώς διαφορετικούς/λάθος λόγους) θα μπορούσαν ψευδώς να μετρηθούν ως "ίδια", το εντοπίζουμε ρητά και το εξαιρούμε από το headline accuracy.
-- **Ιδιαιτερότητες πρωτότυπων datasets**: το ATIS/Geography/Advising προέρχονται από ένα ερευνητικό corpus δεκαετιών, με ασυνέπειες case-sensitivity στα table names και ορισμένες gold απαντήσεις που δεν απαντούν κυριολεκτικά στην ερώτηση.
-- **Μέγεθος δείγματος στα custom datasets**: 2-15 ερωτήσεις έκαστο — πολύ μικρό για στατιστικά αξιόπιστα ποσοστά μεμονωμένα (τα ευρεία confidence intervals στο σχετικό γράφημα το δείχνουν ξεκάθαρα).
-- **Heuristic difficulty labeling**: η αυτόματη κατηγοριοποίηση δυσκολίας δεν είναι τέλεια (βλ. μη-μονότονο easy/medium/hard μοτίβο παραπάνω).
+- **Zero-shot / ελάχιστο few-shot**: μόνο 1 παράδειγμα ανά schema.
+- **Lenient metric αγνοεί ταυτότητα στηλών**: ελέγχει αν οι τιμές του gold εμφανίζονται κάπου στο generated αποτέλεσμα, χωρίς να λαμβάνει υπόψη από ποια στήλη προέρχεται η κάθε τιμή — σε σπάνιες περιπτώσεις θα μπορούσε να δώσει ψευδώς θετικό αποτέλεσμα.
+- **Ιδιαιτερότητες πρωτότυπων datasets**: το ATIS/Geography/Advising έχουν ορισμένες gold απαντήσεις που δεν απαντούν κυριολεκτικά στην ερώτηση (π.χ. hardcoded ιστορικές ημερομηνίες στο ATIS).
+- **Heuristic difficulty labeling**: δεν αντιστοιχεί πάντα τέλεια στην πραγματική δυσκολία μιας ερώτησης για ένα LLM.
+- **Μέγεθος δείγματος στα custom datasets**: 7-15 ερωτήσεις ανά κατηγορία — αρκετό για ενδεικτική εικόνα, με αντίστοιχα ευρύτερα confidence intervals.
+- **Single-question duplication**: 1 ζευγάρι πανομοιότυπων ερωτήσεων (ATIS, διαφορετικά splits του πρωτότυπου corpus) εντοπίστηκε στο δείγμα — αμελητέα επίπτωση (330 αντί 331 μοναδικές ερωτήσεις).
 
 
 ## Άδεια χρήσης
