@@ -35,6 +35,58 @@ docker run --name mariadb-db -e MYSQL_ROOT_PASSWORD=1234 -p 3307:3306 -d mariadb
 - MySQL: `localhost:3306`
 - MariaDB: `localhost:3307`
 
+Στο σημείο αυτό τα containers τρέχουν αλλά είναι **κενά** — δεν περιέχουν ακόμα κανένα table ή δεδομένα.
+
+### Φόρτωση δεδομένων στις βάσεις (υποχρεωτικό βήμα, πριν το evaluation pipeline)
+
+Κάθε ένα από τα 3 datasets (`geography`, `atis`, `advising`) πρέπει να δημιουργηθεί ως ξεχωριστό database **και στις δύο** βάσεις (MySQL, MariaDB), και να φορτωθεί με το αντίστοιχο `-db.sql` αρχείο του από το `data/raw/<dataset>/`.
+
+**Βήμα 1 — Δημιούργησε τα 3 databases και στις δύο βάσεις.** Μπορείς να το κάνεις είτε γραφικά (DBeaver: δεξί κλικ στο "Databases" → "Create New Database"), είτε από τη γραμμή εντολών:
+
+```bash
+docker exec -i mysql-db mysql -uroot -p1234 -e "CREATE DATABASE geography; CREATE DATABASE atis; CREATE DATABASE advising;"
+docker exec -i mariadb-db mariadb -uroot -p1234 -e "CREATE DATABASE geography; CREATE DATABASE atis; CREATE DATABASE advising;"
+```
+
+**Βήμα 2 — Φόρτωσε το κάθε `-db.sql` αρχείο μέσα στο αντίστοιχο database, και στις δύο βάσεις.** Σημείωση: το MariaDB image χρησιμοποιεί την εντολή `mariadb` (όχι `mysql`) ως client.
+
+Σε **Windows PowerShell**:
+```powershell
+Get-Content "data\raw\geography\geography-db.sql" | docker exec -i mysql-db mysql -uroot -p1234 geography
+Get-Content "data\raw\geography\geography-db.sql" | docker exec -i mariadb-db mariadb -uroot -p1234 geography
+
+Get-Content "data\raw\atis\atis-db.sql" | docker exec -i mysql-db mysql -uroot -p1234 atis
+Get-Content "data\raw\atis\atis-db.sql" | docker exec -i mariadb-db mariadb -uroot -p1234 atis
+
+Get-Content "data\raw\advising\advising-db.sql" | docker exec -i mysql-db mysql -uroot -p1234 advising
+Get-Content "data\raw\advising\advising-db.sql" | docker exec -i mariadb-db mariadb -uroot -p1234 advising
+```
+
+Σε **macOS/Linux (bash)**, αντικατέστησε το `Get-Content "..." |` με `cat ... |`, π.χ.:
+```bash
+cat data/raw/geography/geography-db.sql | docker exec -i mysql-db mysql -uroot -p1234 geography
+```
+
+**Βήμα 3 — Επιβεβαίωση.** Μετά τη φόρτωση, κάθε database πρέπει να έχει τα εξής tables:
+
+| Database | Πλήθος tables | Ενδεικτικά ονόματα |
+|---|---|---|
+| `geography` | 7 | `state`, `city`, `river`, `mountain`, `lake`, `border_info`, `highlow` |
+| `atis` | ~25 | `flight`, `airport`, `city`, `fare`, κ.ά. |
+| `advising` | 15 | `COURSE`, `STUDENT`, `PROGRAM`, κ.ά. (σημ.: εδώ τα table names είναι κεφαλαία) |
+
+Γρήγορος έλεγχος από τη γραμμή εντολών:
+```bash
+docker exec -it mysql-db mysql -uroot -p1234 geography -e "SHOW TABLES;"
+```
+
+Ή, ισοδύναμα, μέσω Python (χρησιμοποιεί ήδη τη σύνδεση που ορίζει το pipeline):
+```bash
+python -c "import sys; sys.path.insert(0,'src'); from db_executor import connect, MYSQL_CONFIG, get_schema_description; conn = connect(database='geography', **MYSQL_CONFIG); print(get_schema_description(conn, 'geography')); conn.close()"
+```
+
+⚠️ **Σημαντικό:** τα table names είναι case-sensitive στο Linux MySQL/MariaDB. Το `geography`/`atis` έχουν πεζά table names, ενώ το `advising` έχει κεφαλαία — αυτό χειρίζεται ήδη αυτόματα ο κώδικας (`db_executor.normalize_table_case`), δεν χρειάζεται καμία χειροκίνητη ενέργεια, απλά αναφέρεται εδώ για πληρότητα.
+
 ### Python dependencies
 
 ```bash
@@ -237,19 +289,6 @@ python src/analyze_results.py
 - **Μέγεθος δείγματος στα custom datasets**: 2-15 ερωτήσεις έκαστο — πολύ μικρό για στατιστικά αξιόπιστα ποσοστά μεμονωμένα (τα ευρεία confidence intervals στο σχετικό γράφημα το δείχνουν ξεκάθαρα).
 - **Heuristic difficulty labeling**: η αυτόματη κατηγοριοποίηση δυσκολίας δεν είναι τέλεια (βλ. μη-μονότονο easy/medium/hard μοτίβο παραπάνω).
 
----
-
-## Κατάσταση Παραδοτέων
-
-| Κομμάτι | Κατάσταση |
-|---|---|
-| Environment setup | ✅ Ολοκληρωμένο |
-| Data preparation | ✅ Ολοκληρωμένο |
-| Evaluation pipeline + πειράματα (4 combos) | ✅ Ολοκληρωμένο |
-| Στατιστική ανάλυση + γραφήματα | ✅ Ολοκληρωμένο |
-| Τελική γραπτή αναφορά | ✅ Ολοκληρωμένο — βλ. [`docs/LLMSQL3_Final_Report.docx`](docs/LLMSQL3_Final_Report.docx) |
-
----
 
 ## Άδεια χρήσης
 
