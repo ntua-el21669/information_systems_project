@@ -1,14 +1,23 @@
 """Create statistical summaries and charts from evaluation CSVs.
 
-The script uses the same metric used in the project:
-items whose gold query fails to execute are UNSCOREABLE and are dropped
-from the sample entirely, rather than being counted as model failures.
-Items whose gold query legitimately returns zero rows ARE scored normally:
-the (already-fixed) execution-accuracy comparisons in db_executor.py handle
-that case correctly (a generated query that also returns nothing matches;
-one that returns something else does not). GPT and Qwen are compared with
-an exact paired McNemar test because every model answered the same sampled
-questions.
+The script uses the same metric used in the project. Two kinds of item are
+dropped from the sample entirely rather than being counted as model failures,
+because neither can discriminate between models:
+
+  1. The gold query FAILS TO EXECUTE -- there is no reference result to
+     compare a generated query against.
+  2. The gold query executes but RETURNS ZERO ROWS. Under this project's
+     scoring rule a both-empty result is a "trivial empty match" and is not
+     credited as a success (see evaluator.py), and an empty gold can only be
+     matched by an equally empty generated result. Such an item is therefore
+     a guaranteed failure for every model regardless of the SQL it produces,
+     and leaving it in would inflate the denominator without ever being able
+     to contribute to the numerator.
+
+Both conditions are properties of the ITEM (its gold SQL), not of the model,
+so they remove the same rows for every model and the pairing is preserved.
+GPT and Qwen are compared with an exact paired McNemar test because every
+model answered the same sampled questions.
 
 Usage:
     python src/analyze_results.py
@@ -73,19 +82,18 @@ def load_results() -> dict[str, pd.DataFrame]:
         missing = required - set(df.columns)
         if missing:
             raise ValueError(f"{path} is missing columns: {sorted(missing)}")
-        # An item is SCOREABLE unless its gold query fails to execute -- if
-        # the reference itself is broken we have no ground truth to compare
-        # against. A gold query that legitimately returns ZERO rows is still
-        # scoreable: the fixed execution-accuracy comparisons already handle
-        # it correctly (see db_executor.compare_execution_results_lenient,
-        # which now only agrees with an empty gold when the generated query
-        # is ALSO empty -- no longer a vacuous match against any generated
-        # output). This is a property of the ITEM (the gold SQL), not of the
-        # model, so it is identical across models and can be dropped without
-        # breaking the pairing the McNemar test depends on.
-        df["scoreable"] = df["gold_execution_error"].isna()
-        # The trivial mask is kept as a defensive no-op: on the scoreable
-        # subset a both-empty match cannot occur, since gold returned rows.
+        # An item is SCOREABLE only if its gold query both executes and
+        # returns at least one row; see the module docstring for why each
+        # exclusion is necessary. Both are properties of the ITEM (the gold
+        # SQL), not of the model, so they are identical across models and can
+        # be dropped without breaking the pairing the McNemar test depends on.
+        df["gold_failed"] = df["gold_execution_error"].notna()
+        df["gold_empty"] = ~df["gold_failed"] & (df["gold_row_count"].fillna(-1) == 0)
+        df["scoreable"] = ~df["gold_failed"] & ~df["gold_empty"]
+        # On the scored subset the gold query always returns at least one row,
+        # so a both-empty match cannot occur and this mask is a genuine no-op.
+        # It is kept so these expressions stay correct if the empty-gold
+        # exclusion above is ever relaxed.
         trivial = df["trivial_empty_match"].fillna(False).astype(bool)
         df["strict_effective"] = df["correct"].fillna(False).astype(bool) & ~trivial
         df["lenient"] = df["correct_lenient"].fillna(False).astype(bool) & ~trivial
@@ -94,20 +102,26 @@ def load_results() -> dict[str, pd.DataFrame]:
     return data
 
 
-def drop_unscoreable(data: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame], int, int]:
-    """Drop items whose gold query fails to execute; verify the models agree on which."""
-    masks = {m: df["scoreable"].reset_index(drop=True) for m, df in data.items()}
-    reference_model, reference = next(iter(masks.items()))
-    for model, mask in masks.items():
-        if not mask.equals(reference):
-            raise ValueError(
-                f"Scoreable items differ between {reference_model} and {model} "
-                f"({int(reference.sum())} vs {int(mask.sum())}). Whether a gold query "
-                "returns rows must not depend on the model; re-score both files "
-                "against the same database before analysing."
-            )
+def drop_unscoreable(data: dict[str, pd.DataFrame]) -> tuple[dict[str, pd.DataFrame], int, int, int, int]:
+    """Drop items with a failing or empty gold result; verify the models agree on which.
+
+    Returns the kept frames plus (n_total, n_gold_failed, n_gold_empty, n_scored).
+    """
+    for column in ("gold_failed", "gold_empty", "scoreable"):
+        masks = {m: df[column].reset_index(drop=True) for m, df in data.items()}
+        reference_model, reference = next(iter(masks.items()))
+        for model, mask in masks.items():
+            if not mask.equals(reference):
+                raise ValueError(
+                    f"'{column}' differs between {reference_model} and {model} "
+                    f"({int(reference.sum())} vs {int(mask.sum())}). Whether a gold query "
+                    "executes and whether it returns rows must not depend on the model; "
+                    "re-score both files against the same database before analysing."
+                )
+    reference_df = next(iter(data.values()))
     kept = {m: df[df["scoreable"]].reset_index(drop=True) for m, df in data.items()}
-    return kept, len(reference), int(reference.sum())
+    return (kept, len(reference_df), int(reference_df["gold_failed"].sum()),
+            int(reference_df["gold_empty"].sum()), int(reference_df["scoreable"].sum()))
 
 
 def metric_rows(data: dict[str, pd.DataFrame]) -> list[dict]:
@@ -194,7 +208,7 @@ def svg_bar_chart(path: Path, title: str, rows: list[dict], groups: list[str], m
         '<desc id="desc">Grouped bar chart of percentages by model and category.</desc>',
         '<rect width="100%" height="100%" fill="white"/>',
         f'<text x="{left}" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="700">{html.escape(title)}</text>',
-        f'<text x="{left}" y="62" font-family="Arial, sans-serif" font-size="13" fill="#475569">Items whose gold query fails to execute are excluded as unscoreable; whiskers are 95% Wilson confidence intervals.</text>',
+        f'<text x="{left}" y="62" font-family="Arial, sans-serif" font-size="13" fill="#475569">Items whose gold query fails to execute or returns no rows are excluded; whiskers are 95% Wilson confidence intervals.</text>',
     ]
     for tick in range(0, 101, 20):
         y = top + plot_h - (tick / 100) * plot_h
@@ -236,20 +250,27 @@ def svg_bar_chart(path: Path, title: str, rows: list[dict], groups: list[str], m
     path.write_text("\n".join(chart), encoding="utf-8")
 
 
-def write_report(path: Path, rows: list[dict], tests: list[dict],
-                 n_total: int, n_scoreable: int) -> None:
+def write_report(path: Path, rows: list[dict], tests: list[dict], n_total: int,
+                 n_gold_failed: int, n_gold_empty: int, n_scored: int) -> None:
     overall = [r for r in rows if r["dimension"] == "overall" and r["metric"] != "Execution error rate"]
     lines = [
         "# Statistical analysis summary",
         "",
         "## Method",
         "",
-        f"Of the {n_total} sampled questions, {n_total - n_scoreable} are excluded as unscoreable: "
-        f"their gold query fails to execute, so there is no reference result to compare against. "
-        f"Whether a gold query fails depends only on the item and not on the model, so the same "
-        f"{n_scoreable} items are scored for both models and the pairing is preserved. Accuracy "
-        f"intervals are 95% Wilson binomial confidence intervals. GPT and Qwen are compared using "
-        f"an exact two-sided paired McNemar test over these {n_scoreable} items.",
+        f"Of the {n_total} sampled questions, {n_total - n_scored} are excluded and {n_scored} are "
+        f"scored. {n_gold_failed} are excluded because the gold query fails to execute, so there is "
+        f"no reference result to compare against. A further {n_gold_empty} are excluded because the "
+        f"gold query executes but returns no rows: a both-empty result is treated as a trivial "
+        f"match and is not credited as a success, and an empty gold result can only be matched by "
+        f"an equally empty generated result, so such an item is a guaranteed failure for every "
+        f"model and would inflate the denominator without ever being able to contribute to the "
+        f"numerator. Both conditions depend only on the item and not on the model, so the same "
+        f"{n_scored} items are scored for both models and the pairing is preserved. Note that the "
+        f"exclusions are not spread evenly across the strata, so the scored subset is no longer a "
+        f"stratified sample of the source corpus. Accuracy intervals are 95% Wilson binomial "
+        f"confidence intervals. GPT and Qwen are compared using an exact two-sided paired McNemar "
+        f"test over these {n_scored} items.",
         "",
         "## Overall results",
         "",
@@ -276,14 +297,16 @@ def write_report(path: Path, rows: list[dict], tests: list[dict],
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     data = load_results()
-    data, n_total, n_scoreable = drop_unscoreable(data)
-    print(f"Scoreable items: {n_scoreable}/{n_total} "
-          f"({n_total - n_scoreable} dropped: gold SQL execution error)")
+    data, n_total, n_gold_failed, n_gold_empty, n_scored = drop_unscoreable(data)
+    print(f"Scored items: {n_scored}/{n_total} "
+          f"({n_gold_failed} dropped: gold SQL execution error; "
+          f"{n_gold_empty} dropped: gold SQL returned no rows)")
     rows = metric_rows(data)
     tests = paired_tests(data)
     write_csv(OUTPUT_DIR / "metric_summary.csv", rows)
     write_csv(OUTPUT_DIR / "paired_mcnemar_test.csv", tests)
-    write_report(OUTPUT_DIR / "statistical_summary.md", rows, tests, n_total, n_scoreable)
+    write_report(OUTPUT_DIR / "statistical_summary.md", rows, tests, n_total,
+                 n_gold_failed, n_gold_empty, n_scored)
 
     metrics = ["Strict execution accuracy", "Lenient execution accuracy"]
     svg_bar_chart(OUTPUT_DIR / "accuracy_overall.svg", "Overall execution accuracy", rows, ["All questions"], metrics)
