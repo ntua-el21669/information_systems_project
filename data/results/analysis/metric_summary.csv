@@ -1,16 +1,16 @@
 model,dimension,group,metric,successes,total,rate,ci95_low,ci95_high
-GPT-4o-mini,overall,All questions,Strict execution accuracy,50,325,0.15384615384615385,0.11868394001436916,0.19709605862327279
-GPT-4o-mini,overall,All questions,Lenient execution accuracy,61,325,0.18769230769230769,0.1489800645526046,0.23370144532935677
-GPT-4o-mini,overall,All questions,Execution error rate,44,325,0.13538461538461538,0.10242030910046523,0.17686795613118422
-GPT-4o-mini,dataset,advising,Strict execution accuracy,14,122,0.11475409836065574,0.06959852436764669,0.18343068060113943
-GPT-4o-mini,dataset,advising,Lenient execution accuracy,15,122,0.12295081967213115,0.07594305873968113,0.192979141868067
-GPT-4o-mini,dataset,advising,Execution error rate,14,122,0.11475409836065574,0.06959852436764669,0.18343068060113943
-GPT-4o-mini,dataset,atis,Strict execution accuracy,12,148,0.08108108108108109,0.04698790503444143,0.13637159591918396
-GPT-4o-mini,dataset,atis,Lenient execution accuracy,19,148,0.12837837837837837,0.08374888237605915,0.1918119652440924
-GPT-4o-mini,dataset,atis,Execution error rate,22,148,0.14864864864864866,0.10025962527909332,0.21481608519814088
-GPT-4o-mini,dataset,custom_advising,Strict execution accuracy,0,8,0.0,0.0,0.3244156195108769
-GPT-4o-mini,dataset,custom_advising,Lenient execution accuracy,1,8,0.125,0.02241690886329617,0.4708948057698615
-GPT-4o-mini,dataset,custom_advising,Execution error rate,0,8,0.0,0.0,0.3244156195108769
+GPT-4o-mini,overall,All questions,Strict execution accuracy,50,244,0.20491803278688525,0.15903080409966716,0.2599529339007331
+GPT-4o-mini,overall,All questions,Lenient execution accuracy,61,244,0.25,0.19982593157059225,0.30792417979085807
+GPT-4o-mini,overall,All questions,Execution error rate,36,244,0.14754098360655737,0.10851428542168975,0.1974940683010106
+GPT-4o-mini,dataset,advising,Strict execution accuracy,14,57,0.24561403508771928,0.1523270046544784,0.3710254384107928
+GPT-4o-mini,dataset,advising,Lenient execution accuracy,15,57,0.2631578947368421,0.1664564242184771,0.3897682641526373
+GPT-4o-mini,dataset,advising,Execution error rate,7,57,0.12280701754385964,0.060779830035075005,0.2324668958892925
+GPT-4o-mini,dataset,atis,Strict execution accuracy,12,135,0.08888888888888889,0.05157885461025679,0.14894894109362447
+GPT-4o-mini,dataset,atis,Lenient execution accuracy,19,135,0.14074074074074075,0.09198786092943734,0.20937426684782834
+GPT-4o-mini,dataset,atis,Execution error rate,21,135,0.15555555555555556,0.10405019069443462,0.22612174624665515
+GPT-4o-mini,dataset,custom_advising,Strict execution accuracy,0,5,0.0,0.0,0.43449149475208104
+GPT-4o-mini,dataset,custom_advising,Lenient execution accuracy,1,5,0.2,0.03622316096978745,0.6244717358814613
+GPT-4o-mini,dataset,custom_advising,Execution error rate,0,5,0.0,0.0,0.43449149475208104
 GPT-4o-mini,dataset,custom_atis,Strict execution accuracy,1,7,0.14285714285714285,0.02567895594897479,0.51313450331903
 GPT-4o-mini,dataset,custom_atis,Lenient execution accuracy,1,7,0.14285714285714285,0.02567895594897479,0.51313450331903
 GPT-4o-mini,dataset,custom_atis,Execution error rate,2,7,0.2857142857142857,0.0822171657090155,0.6410709098517873
@@ -20,27 +20,27 @@ GPT-4o-mini,dataset,custom_geography,Execution error rate,3,15,0.2,0.07047420643
 GPT-4o-mini,dataset,geography,Strict execution accuracy,16,25,0.64,0.44518154601046633,0.7975234356826436
 GPT-4o-mini,dataset,geography,Lenient execution accuracy,17,25,0.68,0.4840991373457672,0.8279501248310885
 GPT-4o-mini,dataset,geography,Execution error rate,3,25,0.12,0.04166741357068093,0.2995619218337349
-GPT-4o-mini,difficulty,easy,Strict execution accuracy,14,53,0.2641509433962264,0.16437206511316813,0.3958092105722453
-GPT-4o-mini,difficulty,easy,Lenient execution accuracy,20,53,0.37735849056603776,0.25936076571733824,0.5119334976390768
-GPT-4o-mini,difficulty,easy,Execution error rate,5,53,0.09433962264150944,0.04097203744189684,0.20253975673701435
-GPT-4o-mini,difficulty,hard,Strict execution accuracy,27,197,0.13705583756345177,0.09593107649291302,0.19206503586627946
-GPT-4o-mini,difficulty,hard,Lenient execution accuracy,29,197,0.14720812182741116,0.10449138365896612,0.20342092136150772
-GPT-4o-mini,difficulty,hard,Execution error rate,31,197,0.15736040609137056,0.11312818092331962,0.21470031675843554
-GPT-4o-mini,difficulty,medium,Strict execution accuracy,9,75,0.12,0.06443298969072164,0.2125984251968504
-GPT-4o-mini,difficulty,medium,Lenient execution accuracy,12,75,0.16,0.09396421323774289,0.25916915797745316
-GPT-4o-mini,difficulty,medium,Execution error rate,8,75,0.10666666666666667,0.05504846963856164,0.19661562647313574
-Qwen2.5-Coder-7B-Instruct,overall,All questions,Strict execution accuracy,36,325,0.11076923076923077,0.08109106067231031,0.14954156001801594
-Qwen2.5-Coder-7B-Instruct,overall,All questions,Lenient execution accuracy,44,325,0.13538461538461538,0.10242030910046523,0.17686795613118422
-Qwen2.5-Coder-7B-Instruct,overall,All questions,Execution error rate,102,325,0.31384615384615383,0.2658166869761049,0.36622500118013807
-Qwen2.5-Coder-7B-Instruct,dataset,advising,Strict execution accuracy,7,122,0.05737704918032787,0.028068085045679897,0.11371015045037228
-Qwen2.5-Coder-7B-Instruct,dataset,advising,Lenient execution accuracy,9,122,0.07377049180327869,0.03929335962779893,0.13427086714617725
-Qwen2.5-Coder-7B-Instruct,dataset,advising,Execution error rate,37,122,0.30327868852459017,0.22874525512189398,0.3898228495430181
-Qwen2.5-Coder-7B-Instruct,dataset,atis,Strict execution accuracy,4,148,0.02702702702702703,0.010559214292546873,0.06742731904219143
-Qwen2.5-Coder-7B-Instruct,dataset,atis,Lenient execution accuracy,8,148,0.05405405405405406,0.027641133409649507,0.10303188373453236
-Qwen2.5-Coder-7B-Instruct,dataset,atis,Execution error rate,56,148,0.3783783783783784,0.30425277698958925,0.458658045867915
-Qwen2.5-Coder-7B-Instruct,dataset,custom_advising,Strict execution accuracy,2,8,0.25,0.07147768885802763,0.5907301208974108
-Qwen2.5-Coder-7B-Instruct,dataset,custom_advising,Lenient execution accuracy,2,8,0.25,0.07147768885802763,0.5907301208974108
-Qwen2.5-Coder-7B-Instruct,dataset,custom_advising,Execution error rate,0,8,0.0,0.0,0.3244156195108769
+GPT-4o-mini,difficulty,easy,Strict execution accuracy,14,42,0.3333333333333333,0.2101228076197232,0.4844777298833308
+GPT-4o-mini,difficulty,easy,Lenient execution accuracy,20,42,0.47619047619047616,0.3335936447596496,0.6227778605979295
+GPT-4o-mini,difficulty,easy,Execution error rate,4,42,0.09523809523809523,0.0376616388283121,0.2206539522505333
+GPT-4o-mini,difficulty,hard,Strict execution accuracy,27,165,0.16363636363636364,0.1149646564722128,0.22761442356493441
+GPT-4o-mini,difficulty,hard,Lenient execution accuracy,29,165,0.17575757575757575,0.12525114851619204,0.24101877548358044
+GPT-4o-mini,difficulty,hard,Execution error rate,26,165,0.15757575757575756,0.10985988630792892,0.22087377174790557
+GPT-4o-mini,difficulty,medium,Strict execution accuracy,9,37,0.24324324324324326,0.13361203432663304,0.4011760249070895
+GPT-4o-mini,difficulty,medium,Lenient execution accuracy,12,37,0.32432432432432434,0.19633077820815478,0.48536631495176064
+GPT-4o-mini,difficulty,medium,Execution error rate,6,37,0.16216216216216217,0.07651103235297099,0.31136799295455864
+Qwen2.5-Coder-7B-Instruct,overall,All questions,Strict execution accuracy,36,244,0.14754098360655737,0.10851428542168975,0.1974940683010106
+Qwen2.5-Coder-7B-Instruct,overall,All questions,Lenient execution accuracy,44,244,0.18032786885245902,0.13716180622795038,0.23340390993914994
+Qwen2.5-Coder-7B-Instruct,overall,All questions,Execution error rate,78,244,0.319672131147541,0.2643395492848924,0.3805949572709079
+Qwen2.5-Coder-7B-Instruct,dataset,advising,Strict execution accuracy,7,57,0.12280701754385964,0.060779830035075005,0.2324668958892925
+Qwen2.5-Coder-7B-Instruct,dataset,advising,Lenient execution accuracy,9,57,0.15789473684210525,0.08535699749316844,0.2736342190428858
+Qwen2.5-Coder-7B-Instruct,dataset,advising,Execution error rate,18,57,0.3157894736842105,0.21004123631681515,0.4448001879718294
+Qwen2.5-Coder-7B-Instruct,dataset,atis,Strict execution accuracy,4,135,0.02962962962962963,0.011581269352682073,0.0737072896959028
+Qwen2.5-Coder-7B-Instruct,dataset,atis,Lenient execution accuracy,8,135,0.05925925925925926,0.030329997338257482,0.1125781800379756
+Qwen2.5-Coder-7B-Instruct,dataset,atis,Execution error rate,51,135,0.37777777777777777,0.30044184814962244,0.4618772262488288
+Qwen2.5-Coder-7B-Instruct,dataset,custom_advising,Strict execution accuracy,2,5,0.4,0.1176182311592533,0.769280067791163
+Qwen2.5-Coder-7B-Instruct,dataset,custom_advising,Lenient execution accuracy,2,5,0.4,0.1176182311592533,0.769280067791163
+Qwen2.5-Coder-7B-Instruct,dataset,custom_advising,Execution error rate,0,5,0.0,0.0,0.43449149475208104
 Qwen2.5-Coder-7B-Instruct,dataset,custom_atis,Strict execution accuracy,1,7,0.14285714285714285,0.02567895594897479,0.51313450331903
 Qwen2.5-Coder-7B-Instruct,dataset,custom_atis,Lenient execution accuracy,1,7,0.14285714285714285,0.02567895594897479,0.51313450331903
 Qwen2.5-Coder-7B-Instruct,dataset,custom_atis,Execution error rate,1,7,0.14285714285714285,0.02567895594897479,0.51313450331903
@@ -50,12 +50,12 @@ Qwen2.5-Coder-7B-Instruct,dataset,custom_geography,Execution error rate,3,15,0.2
 Qwen2.5-Coder-7B-Instruct,dataset,geography,Strict execution accuracy,16,25,0.64,0.44518154601046633,0.7975234356826436
 Qwen2.5-Coder-7B-Instruct,dataset,geography,Lenient execution accuracy,16,25,0.64,0.44518154601046633,0.7975234356826436
 Qwen2.5-Coder-7B-Instruct,dataset,geography,Execution error rate,5,25,0.2,0.08860454100652487,0.3913133553653824
-Qwen2.5-Coder-7B-Instruct,difficulty,easy,Strict execution accuracy,14,53,0.2641509433962264,0.16437206511316813,0.3958092105722453
-Qwen2.5-Coder-7B-Instruct,difficulty,easy,Lenient execution accuracy,15,53,0.2830188679245283,0.17966135362950314,0.4157054200010772
-Qwen2.5-Coder-7B-Instruct,difficulty,easy,Execution error rate,7,53,0.1320754716981132,0.06547770200689572,0.2484050880623493
-Qwen2.5-Coder-7B-Instruct,difficulty,hard,Strict execution accuracy,12,197,0.06091370558375635,0.03518474494003208,0.1034399224595505
-Qwen2.5-Coder-7B-Instruct,difficulty,hard,Lenient execution accuracy,17,197,0.08629441624365482,0.05457453067073151,0.13384061838205438
-Qwen2.5-Coder-7B-Instruct,difficulty,hard,Execution error rate,78,197,0.39593908629441626,0.33026331666543374,0.46559570855643273
-Qwen2.5-Coder-7B-Instruct,difficulty,medium,Strict execution accuracy,10,75,0.13333333333333333,0.07406505099414731,0.2283336826692994
-Qwen2.5-Coder-7B-Instruct,difficulty,medium,Lenient execution accuracy,12,75,0.16,0.09396421323774289,0.25916915797745316
-Qwen2.5-Coder-7B-Instruct,difficulty,medium,Execution error rate,17,75,0.22666666666666666,0.14661247942117506,0.33335748567339424
+Qwen2.5-Coder-7B-Instruct,difficulty,easy,Strict execution accuracy,14,42,0.3333333333333333,0.2101228076197232,0.4844777298833308
+Qwen2.5-Coder-7B-Instruct,difficulty,easy,Lenient execution accuracy,15,42,0.35714285714285715,0.22988992501626865,0.5083391071292063
+Qwen2.5-Coder-7B-Instruct,difficulty,easy,Execution error rate,4,42,0.09523809523809523,0.0376616388283121,0.2206539522505333
+Qwen2.5-Coder-7B-Instruct,difficulty,hard,Strict execution accuracy,12,165,0.07272727272727272,0.04208917242305084,0.12280857789440645
+Qwen2.5-Coder-7B-Instruct,difficulty,hard,Lenient execution accuracy,17,165,0.10303030303030303,0.06532625349871299,0.1587986067253076
+Qwen2.5-Coder-7B-Instruct,difficulty,hard,Execution error rate,65,165,0.3939393939393939,0.32260939942166716,0.4700957159053611
+Qwen2.5-Coder-7B-Instruct,difficulty,medium,Strict execution accuracy,10,37,0.2702702702702703,0.15397298246990684,0.4297847547392133
+Qwen2.5-Coder-7B-Instruct,difficulty,medium,Lenient execution accuracy,12,37,0.32432432432432434,0.19633077820815478,0.48536631495176064
+Qwen2.5-Coder-7B-Instruct,difficulty,medium,Execution error rate,9,37,0.24324324324324326,0.13361203432663304,0.4011760249070895

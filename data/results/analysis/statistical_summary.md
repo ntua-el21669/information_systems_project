@@ -2,16 +2,16 @@
 
 ## Method
 
-Of the 331 sampled questions, 6 are excluded as unscoreable: their gold query fails to execute, so there is no reference result to compare against. Whether a gold query fails depends only on the item and not on the model, so the same 325 items are scored for both models and the pairing is preserved. Accuracy intervals are 95% Wilson binomial confidence intervals. GPT and Qwen are compared using an exact two-sided paired McNemar test over these 325 items.
+Of the 331 sampled questions, 87 are excluded and 244 are scored. 6 are excluded because the gold query fails to execute, so there is no reference result to compare against. A further 81 are excluded because the gold query executes but returns no rows: a both-empty result is treated as a trivial match and is not credited as a success, and an empty gold result can only be matched by an equally empty generated result, so such an item is a guaranteed failure for every model and would inflate the denominator without ever being able to contribute to the numerator. Both conditions depend only on the item and not on the model, so the same 244 items are scored for both models and the pairing is preserved. Note that the exclusions are not spread evenly across the strata, so the scored subset is no longer a stratified sample of the source corpus. Accuracy intervals are 95% Wilson binomial confidence intervals. GPT and Qwen are compared using an exact two-sided paired McNemar test over these 244 items.
 
 ## Overall results
 
 | Model | Metric | Result | 95% CI |
 |---|---|---:|---:|
-| GPT-4o-mini | Strict execution accuracy | 50/325 (15.4%) | 11.9%–19.7% |
-| GPT-4o-mini | Lenient execution accuracy | 61/325 (18.8%) | 14.9%–23.4% |
-| Qwen2.5-Coder-7B-Instruct | Strict execution accuracy | 36/325 (11.1%) | 8.1%–15.0% |
-| Qwen2.5-Coder-7B-Instruct | Lenient execution accuracy | 44/325 (13.5%) | 10.2%–17.7% |
+| GPT-4o-mini | Strict execution accuracy | 50/244 (20.5%) | 15.9%–26.0% |
+| GPT-4o-mini | Lenient execution accuracy | 61/244 (25.0%) | 20.0%–30.8% |
+| Qwen2.5-Coder-7B-Instruct | Strict execution accuracy | 36/244 (14.8%) | 10.9%–19.7% |
+| Qwen2.5-Coder-7B-Instruct | Lenient execution accuracy | 44/244 (18.0%) | 13.7%–23.3% |
 
 ## GPT vs. Qwen (paired tests)
 
