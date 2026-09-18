@@ -180,7 +180,7 @@ python src/summary.py            # ενοποιεί τα πάντα -> all_datas
 - **Execution accuracy** αντί για string matching.
 - **Δύο μετρικές ανά ερώτηση**: *strict* (ίδιες στήλες/τιμές ακριβώς) και *lenient* (επιτρέπει επιπλέον στήλες, αρκεί να περιέχουν όλες τις σωστές τιμές).
 - **`trivial_empty_match` flag**: αν gold και generated SQL επιστρέφουν *και τα δύο* 0 γραμμές, δεν μετράμε ψευδώς ως "σωστό".
-- **Unscoreable items**: αποκλείονται **μόνο** ερωτήσεις όπου το ίδιο το gold SQL αποτυγχάνει να εκτελεστεί· ερωτήσεις όπου το gold νόμιμα επιστρέφει 0 γραμμές **παραμένουν** και βαθμολογούνται κανονικά.
+- **Unscoreable items**: αποκλείονται οι ερωτήσεις όπου το gold SQL αποτυγχάνει να εκτελεστεί **και** εκείνες όπου το gold επιστρέφει 0 γραμμές — στη δεύτερη περίπτωση το μόνο πιθανό match είναι ένα trivial empty match, που δεν πιστώνεται ως σωστό, άρα το item είναι εξ ορισμού αποτυχία για κάθε μοντέλο.
 - **Αυτόματη παραγωγή schema description** από το `information_schema` της βάσης.
 - **Ένα few-shot παράδειγμα ανά schema** μέσα στο prompt.
 - **Δειγματοληψία (`build_full_sample`)**: στρωματοποιημένο δείγμα ~300 ερωτήσεων από τα 3 δημόσια datasets (by dataset × difficulty), **συν όλα τα 31 custom queries επιπλέον** — ώστε τα custom queries (ρητή απαίτηση της εκφώνησης) να έχουν πάντα πλήρη αντιπροσώπευση, ανεξάρτητα από το πόσο μικρά είναι σε σχέση με τα δημόσια datasets. Τελικό μέγεθος δείγματος: **331 ερωτήσεις**.
@@ -216,52 +216,52 @@ python src/analyze_results.py
 
 ## Αποτελέσματα
 
-Δείγμα: **331 ερωτήσεις** (~300 στρωματοποιημένες από τα 3 δημόσια datasets + όλα τα 31 custom queries), από τις οποίες **325 (MySQL) / 328 (MariaDB)** είναι scoreable. Πλήρη στατιστικά στο [`data/results/analysis/statistical_summary.md`](data/results/analysis/statistical_summary.md).
+Δείγμα: **331 ερωτήσεις** (~300 στρωματοποιημένες από τα 3 δημόσια datasets + όλα τα 31 custom queries), από τις οποίες **244 (MySQL) / 247 (MariaDB)** είναι scoreable (MySQL: 6 με gold execution error + 81 με gold 0 γραμμών αποκλείονται). Πλήρη στατιστικά στο [`data/results/analysis/statistical_summary.md`](data/results/analysis/statistical_summary.md).
 
-### Overall execution accuracy (95% Wilson confidence intervals, N=325)
+### Overall execution accuracy (95% Wilson confidence intervals, N=244)
 
 | Μοντέλο | Μετρική | Αποτέλεσμα | 95% CI |
 |---|---|---:|---:|
-| GPT-4o-mini | Strict | 50/325 (15.4%) | 11.9%–19.7% |
-| GPT-4o-mini | Lenient | 61/325 (18.8%) | 14.9%–23.4% |
-| Qwen2.5-Coder-7B-Instruct | Strict | 36/325 (11.1%) | 8.1%–15.0% |
-| Qwen2.5-Coder-7B-Instruct | Lenient | 44/325 (13.5%) | 10.2%–17.7% |
+| GPT-4o-mini | Strict | 50/244 (20.5%) | 15.9%–26.0% |
+| GPT-4o-mini | Lenient | 61/244 (25.0%) | 20.0%–30.8% |
+| Qwen2.5-Coder-7B-Instruct | Strict | 36/244 (14.8%) | 10.9%–19.7% |
+| Qwen2.5-Coder-7B-Instruct | Lenient | 44/244 (18.0%) | 13.7%–23.3% |
 
 ### Λοιπές μετρικές
 
 | Metric | GPT×MySQL | GPT×MariaDB | Qwen×MySQL | Qwen×MariaDB |
 |---|---|---|---|---|
-| Strict accuracy | 15.4% (50/325) | 15.2% (50/328) | 11.1% (36/325) | 11.0% (36/328) |
-| Lenient accuracy | 18.8% (61/325) | 18.6% (61/328) | 13.5% (44/325) | 13.4% (44/328) |
+| Strict accuracy | 20.5% (50/244) | 20.2% (50/247) | 14.8% (36/244) | 14.6% (36/247) |
+| Lenient accuracy | 25.0% (61/244) | 24.7% (61/247) | 18.0% (44/244) | 17.8% (44/247) |
 | Μέσο generation latency | 1.08s | 1.08s | 4.87s | 4.87s |
-| Execution errors (syntax) | 44/325 (13.5%) | 44/328 (13.4%) | 102/325 (31.4%) | 104/328 (31.7%) |
+| Execution errors (syntax) | 36/244 (14.8%) | 36/247 (14.6%) | 78/244 (32.0%) | 80/247 (32.4%) |
 
 ### Accuracy ανά dataset (strict / lenient, MySQL)
 
 | Dataset | n | GPT-4o-mini | Qwen2.5-Coder-7B |
 |---|---|---|---|
 | Geography | 25 | 64.0% / 68.0% | 64.0% / 64.0% |
-| Advising | 122 | 11.5% / 12.3% | 5.7% / 7.4% |
-| ATIS | 148 | 8.1% / 12.8% | 2.7% / 5.4% |
+| Advising | 57 | 24.6% / 26.3% | 12.3% / 15.8% |
+| ATIS | 135 | 8.9% / 14.1% | 3.0% / 5.9% |
 | Custom — Geography | 15 | 46.7% / 53.3% | 40.0% / 53.3% |
 | Custom — ATIS | 7 | 14.3% / 14.3% | 14.3% / 14.3% |
-| Custom — Advising | 8 | 0.0% / 12.5% | 25.0% / 25.0% |
+| Custom — Advising | 5 | 0.0% / 20.0% | 40.0% / 40.0% |
 
 Βλ. γραφήματα: [`accuracy_by_dataset.svg`](data/results/analysis/accuracy_by_dataset.svg), [`accuracy_by_difficulty.svg`](data/results/analysis/accuracy_by_difficulty.svg).
 
 ### Βασικά ευρήματα
 
 - **GPT νικά το Qwen** σε accuracy (strict και lenient), με στατιστικά σημαντική διαφορά και στις δύο μετρικές, και είναι ~4.5x πιο γρήγορο.
-- **Qwen κάνει σχεδόν διπλάσια syntax errors** — αναμενόμενο για ένα μικρότερο, τοπικά τρέχον, quantized μοντέλο.
+- **Qwen κάνει πάνω από διπλάσια syntax errors** (32.0% vs 14.8%) — αναμενόμενο για ένα μικρότερο, τοπικά τρέχον, quantized μοντέλο.
 - **Το RDBMS (MySQL vs MariaDB) δεν επηρεάζει ουσιαστικά το accuracy** — επηρεάζει ελαφρώς μόνο ποια συγκεκριμένα gold queries εκτελούνται (dialect-level διαφορές) και το execution latency.
 - **Geography είναι το πιο "εύκολο" dataset**, ενώ το ATIS το πιο δύσκολο — λογικό μοτίβο.
-- **Μη-μονότονο easy/medium/hard μοτίβο**: ένδειξη ότι η αυτόματη κατηγοριοποίηση δυσκολίας δεν αντιστοιχεί τέλεια στην πραγματική δυσκολία μιας ερώτησης.
+- **Μονότονο easy/medium/hard μοτίβο** (GPT strict 33.3% / 24.3% / 16.4%, Qwen 33.3% / 27.0% / 7.3%): η αυτόματη κατηγοριοποίηση δυσκολίας συμφωνεί με την πραγματική δυσκολία για τα LLMs.
 
 ---
 
 ## Στατιστική Σημαντικότητα
 
-Σύγκριση GPT vs Qwen με **exact two-sided paired McNemar test** πάνω στις ίδιες 325 scoreable ερωτήσεις:
+Σύγκριση GPT vs Qwen με **exact two-sided paired McNemar test** πάνω στις ίδιες 244 scoreable ερωτήσεις:
 
 | Μετρική | GPT-only correct | Qwen-only correct | p-value | Σημαντικό (α=0.05); |
 |---|---:|---:|---:|:---:|
@@ -278,7 +278,8 @@ python src/analyze_results.py
 - **Lenient metric αγνοεί ταυτότητα στηλών**: ελέγχει αν οι τιμές του gold εμφανίζονται κάπου στο generated αποτέλεσμα, χωρίς να λαμβάνει υπόψη από ποια στήλη προέρχεται η κάθε τιμή — σε σπάνιες περιπτώσεις θα μπορούσε να δώσει ψευδώς θετικό αποτέλεσμα.
 - **Ιδιαιτερότητες πρωτότυπων datasets**: το ATIS/Geography/Advising έχουν ορισμένες gold απαντήσεις που δεν απαντούν κυριολεκτικά στην ερώτηση (π.χ. hardcoded ιστορικές ημερομηνίες στο ATIS).
 - **Heuristic difficulty labeling**: δεν αντιστοιχεί πάντα τέλεια στην πραγματική δυσκολία μιας ερώτησης για ένα LLM.
-- **Μέγεθος δείγματος στα custom datasets**: 7-15 ερωτήσεις ανά κατηγορία — αρκετό για ενδεικτική εικόνα, με αντίστοιχα ευρύτερα confidence intervals.
+- **Το scored subset δεν είναι πλέον στρωματοποιημένο**: οι 87 αποκλεισμένες ερωτήσεις δεν κατανέμονται ομοιόμορφα (Advising -53%, ATIS -9%), οπότε οι αναλογίες dataset × difficulty του αρχικού δείγματος δεν διατηρούνται.
+- **Μέγεθος δείγματος στα custom datasets**: 5-15 ερωτήσεις ανά κατηγορία — αρκετό για ενδεικτική εικόνα, με αντίστοιχα ευρύτερα confidence intervals.
 - **Single-question duplication**: 1 ζευγάρι πανομοιότυπων ερωτήσεων (ATIS, διαφορετικά splits του πρωτότυπου corpus) εντοπίστηκε στο δείγμα — αμελητέα επίπτωση (330 αντί 331 μοναδικές ερωτήσεις).
 
 
