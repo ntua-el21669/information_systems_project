@@ -4,7 +4,7 @@ custom_queries.py
 Οι δικές μας, χειρόγραφες complex ερωτήσεις πάνω στο Geography
 schema (7 tables: state, city, river, mountain, lake, border_info,
 highlow). Φτιάχτηκαν σκόπιμα πιο σύνθετες από το αυθεντικό
-geography.json dataset -- πολλαπλά JOINs, nested subqueries με
+geography.json dataset με πολλαπλά JOINs, nested subqueries με
 2+ επίπεδα, GROUP BY + HAVING, συγκρίσεις μεταξύ ομάδων.
 """
 
